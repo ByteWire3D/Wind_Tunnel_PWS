@@ -7,7 +7,7 @@ Adafruit_INA219 ina219;
 HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 #pragma pack(1)
 struct Messurment_data {
-  float lift_loadcell;
+  float lift_loadcell; // lift loadcell
   float drag_loadcell;
   float ampere;
   float voltage;
