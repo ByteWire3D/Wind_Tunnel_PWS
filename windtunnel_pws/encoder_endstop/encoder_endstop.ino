@@ -1,7 +1,7 @@
 #define ENCA 3     // Define the pin YELLOW encoder wire
 #define ENCB 4     //Define the pin WHITE encoder
-#define motor1 5     // Define the pin for the first motor output signal
-#define motor2 6     // Define the pin for the second motor output signal
+#define motor1 5   // Define the pin for the first motor output signal
+#define motor2 6   // Define the pin for the second motor output signal
 #define PWM_PIN 7  // Define the pin for the PWM signal
 #define ENDSTOP 8  // Define the pin for the endstop signal
 
@@ -21,6 +21,7 @@ float eintegral = 0;
 
 volatile bool encoder_trigger = LOW;
 volatile bool endstop_pressed = false;
+int pos=0;
 volatile int posi = 0;
 unsigned long previousMillis = 0;  // Stores the last time the loop ran
 int endstop_pos = 0;
@@ -67,6 +68,8 @@ float get_target_from_pwm() {
   float target = map(pulseWidth, 1000, 2000, -45, 45);
   return target;
 }
+void send_angle_pwm(float actual_angle) {
+}
 
 void setMotor(int dir, float pwmVal, int motor1, int motor2) {
   if (dir == 1) {
@@ -92,7 +95,7 @@ void PID_motor(float target) {
   prevT = currT;
 
   //get the saved posi(from the ram), and make it an int for furter calculations.
-  int pos = 0;
+  pos = 0;
   portENTER_CRITICAL(&mux);
   pos = posi;
   portEXIT_CRITICAL(&mux);

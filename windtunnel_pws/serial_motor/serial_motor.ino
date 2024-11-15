@@ -1,9 +1,12 @@
-#define ENCA 3     // Define the pin YELLOW encoder wire
-#define ENCB 4     //Define the pin WHITE encoder
-#define motor1 5   // Define the pin for the first motor output signal
-#define motor2 6   // Define the pin for the second motor output signal
+#include <ESP32Servo.h>
+
+
+#define ENCA 3      // Define the pin YELLOW encoder wire
+#define ENCB 4      //Define the pin WHITE encoder
+#define motor1 5    // Define the pin for the first motor output signal
+#define motor2 6    // Define the pin for the second motor output signal
 #define PWM_PIN 20  // Define the pin for the PWM signal
-#define ENDSTOP 8  // Define the pin for the endstop signal
+#define ENDSTOP 8   // Define the pin for the endstop signal
 
 
 
@@ -26,11 +29,17 @@ float eintegral = 0;
 volatile bool encoder_trigger = LOW;
 volatile bool endstop_pressed = false;
 volatile int posi = 0;
+int pos = 0;
 unsigned long previousMillis = 0;  // Stores the last time the loop ran
 int endstop_pos = 0;
 
-float target = 0;
+float degtopos = -7.540271;
 
+float target = 0;
+float curr_angle = 0;
+
+int angleOUT_pin = 21;
+Servo angle_out;
 void setup() {
   Serial.begin(115200);
   //assing all the pins as in or outputs
@@ -43,6 +52,13 @@ void setup() {
 
   digitalWrite(motor1, LOW);
   digitalWrite(motor2, LOW);
+
+  ESP32PWM::allocateTimer(0);  // set timers for the pwm signals
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+  angle_out.setPeriodHertz(50);  // standard 50 hz esc signal
+  angle_out.attach(angleOUT_pin, 1000, 2000);
   //attach the interupts;
   attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
   attachInterrupt(digitalPinToInterrupt(ENDSTOP), readEndstop, FALLING);
@@ -66,6 +82,9 @@ void loop() {
     target = get_target_from_pwm();
     // get target position
     PID_motor(target);
+
+    curr_angle = pos / degtopos;
+    send_angle_pwm(curr_angle);
   }
 }
 
@@ -93,8 +112,13 @@ float get_target_from_pwm() {
   return target;
 }
 
+void send_angle_pwm(float actual_angle) {
+  float pulsewidth = map(actual_angle, -45, 45, 1000, 2000);
+  angle_out.writeMicroseconds(pulsewidth);
+}
+
 void PID_motor(float target) {
-  float degtopos = -7.540271;
+
   target *= degtopos;  // convert target for deg to rotations.
 
   // time difference

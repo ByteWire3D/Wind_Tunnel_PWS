@@ -175,6 +175,7 @@ void loop() {
     digitalwrite(led_pin, HIGH);
     status = 1;
     // Serial.println(status);
+   // recieve_setpoint();
     pid_controller_data data_send{
       status,
       setpoint,
