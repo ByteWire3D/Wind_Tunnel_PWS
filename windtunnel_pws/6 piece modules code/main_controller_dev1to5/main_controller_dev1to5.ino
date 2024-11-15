@@ -100,6 +100,9 @@ struct config_pid_controller {
   float p_gain;
   float i_gain;
   float d_gain;
+
+  int windspeedCount;
+  float windspeedList[10];
 };
 
 struct SDcard_log_data {
@@ -236,7 +239,6 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
         test_datum = sd_data.test_datum;
         memcpy(windspeedList, sd_data.windspeedList, sizeof(windspeedList));
 
-        //
         Serial.println("Data received:");
         Serial.print("Calibration Lift: ");
         Serial.println(calibrationValue_Lift);
@@ -353,8 +355,6 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
         d_out = pid_data.d_out;
         Serial.print("D_out: ");
         Serial.println(d_out);
-
-        
       }
 
       return;
@@ -422,12 +422,17 @@ void setup() {
   sendCommand(meassuring_device, "SET", "meassuring device");
   send_measuring_device_conf_data();
 
-  sendCommand(pid_controller, "SET", "pid_controller"); 
+  sendCommand(pid_controller, "SET", "pid_controller");
   // send(setpoint)  // add the send setpoint function that sends a number or a wordt so the pid contorller can change it,
   // also add the mode as: testing and not testing, and sending conf etc
   // add the setpoint list in the conf
   send_pid_controller_conf_data();
-  // Serial.println("All handshakes complete. Waiting for data...");
+  Serial.println("All handshakes complete. Waiting for data...");
+while(!receiveAcknowledgment(pin_controller, "ACK"){
+    sendCommand(pid_controller, "armed", "pid_controller");
+    delay(500);
+}
+Status = "pid controller armed";
 }
 
 void loop() {
@@ -551,7 +556,9 @@ void send_pid_controller_conf_data() {
     deadband,
     p_gain,
     i_gain,
-    d_gain
+    d_gain,
+    windspeedCount,
+    windspeedList
   };
   sendDataWithRetry(pid_controller, datatosend, 50, 10);
 }

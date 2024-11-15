@@ -11,6 +11,9 @@ struct config_pid_controller {
   float p_gain;
   float i_gain;
   float d_gain;
+
+  int windspeedCount;
+  float windspeedList[10];
 };
 
 struct pid_controller_data {
@@ -119,10 +122,15 @@ float maxDelta = 5;  // Maximum allowed change in output per loop (in microsecon
 float pid_output;
 float delta;
 
+int windspeedCount;
+float windspeedList[10];
+
 volatile int avrg_count = 0;
 float avrg_airspeed;
-
+bool main_controller_status = false;
 HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
+
+int led_pin = 8;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
@@ -144,6 +152,7 @@ void setup() {
   handleSetCommand(main_controller, data_recv);
 
   pinMode(killswitch_pin_pressed, INPUT_PULLUP);
+  pinMode(led_pin, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(killswitch_pin_pressed), killswitch, FALLING);
 
 
@@ -151,18 +160,25 @@ void setup() {
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
   // Calibrate the sensor
   // calibrate();
+  while (system_status == HIGH) {
+    delay(10);
+    digitalwrite(led_pin, HIGH);
+  }
+  digitalwrite(led_pin, LOW);
 }
 
 void loop() {
+  handleCommand(main_controller);
   unsigned long current_time = millis();
 
-  if (system_status == HIGH) {
+  if (system_status == HIGH && main_controller_status == HIGH) {
+    digitalwrite(led_pin, HIGH);
     status = 1;
     // Serial.println(status);
     pid_controller_data data_send{
       status,
+      setpoint,
       avrg_airspeed,
-      airspeed,
       error,
       output,
       baseline_motor_signal,
@@ -199,13 +215,14 @@ void loop() {
     }
   }
   if (system_status == LOW) {
+    digitalwrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    
+
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
-    
+
     avrg_airspeed / avrg_count;
-    
+
     status = 0;
     pid_controller_data data_send{
       status,
@@ -746,6 +763,8 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
         Ki = data.i_gain;
         Kd = data.d_gain;
 
+        windspeedCount = data.windspeedCount;
+        memcpy(windspeedList, sd_data.windspeedList, sizeof(windspeedList));
         Serial.println("cal_airspeed: ");
         Serial.println(correction_value);
         Serial.println("pid_loop-hz: ");
@@ -833,12 +852,31 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
     char command[4];
     serial.readBytes(command, 3);
     command[3] = '\0';
- 
+
     if (strcmp(command, "GET") == 0) {
       Serial.println("GET command received");
       avrg_count = 0;
       avrg_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 30, 25);
+    } else {
+      //Serial.print("other data recieved: ");
+      //Serial.println(command);
+      clearSerialBuffer(serial);
+    }
+  }
+}
+
+void handleCommand(HardwareSerial &serial) {
+  if (serial.available() >= 5) {
+    char command[6];
+    serial.readBytes(command, 5);
+    command[5] = '\0';
+
+    if (strcmp(command, "armed") == 0) {
+      Serial.println("armed command received");
+      main_controller_status = HIGH;
+      sendAcknowledgment(main_controller, "ACK");
+
     } else {
       //Serial.print("other data recieved: ");
       //Serial.println(command);
