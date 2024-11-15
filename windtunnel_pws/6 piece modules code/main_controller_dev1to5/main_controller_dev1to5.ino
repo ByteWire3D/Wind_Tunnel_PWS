@@ -428,11 +428,11 @@ void setup() {
   // add the setpoint list in the conf
   send_pid_controller_conf_data();
   Serial.println("All handshakes complete. Waiting for data...");
-while(!receiveAcknowledgment(pin_controller, "ACK"){
+while(!receiveAcknowledgment(pid_controller, "ACK"){
     sendCommand(pid_controller, "armed", "pid_controller");
     delay(500);
 }
-Status = "pid controller armed";
+mode = "pid controller armed";
 }
 
 void loop() {
@@ -445,32 +445,36 @@ void loop() {
 
     sendCommand(meassuring_device, "GET", "measuring_device");
     waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+    if (system_status == 1) {
+
+      int speed_step = 1;
+      // send_setpoint(pid_controller, speed_step);
+
+      float angle = 23.34;
+      pitch = angle;
+      command_angle_motor(angle);
+
+      // 5hz -->
+      if (count_display >= 5) {
+        count_display = 0;
+        send_display_data();
+      }
+      count_display++;
 
 
-    int speed_step = 1;
-    // send_setpoint(pid_controller, speed_step);
+      send_datalogger();
 
-    float angle = 23.34;
-    pitch = angle;
-    command_angle_motor(angle);
+      Serial.print("loopfrequency :  ");
+      Serial.print(loopFrequency);
+      Serial.print("status :  ");
+      Serial.print(system_status);
+      Serial.println(" !");
 
-    // 5hz -->
-    if (count_display >= 5) {
-      count_display = 0;
-      send_display_data();
+      // Add additional processing for the received data here
     }
-    count_display++;
+  }
+  if(system_status == 0){
 
-
-    send_datalogger();
-
-    Serial.print("loopfrequency :  ");
-    Serial.print(loopFrequency);
-    Serial.print("status :  ");
-    Serial.print(system_status);
-    Serial.println(" !");
-
-    // Add additional processing for the received data here
   }
 }
 void send_datalogger() {
