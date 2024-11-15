@@ -422,7 +422,10 @@ void setup() {
   sendCommand(meassuring_device, "SET", "meassuring device");
   send_measuring_device_conf_data();
 
-  sendCommand(pid_controller, "SET", "pid_controller");
+  sendCommand(pid_controller, "SET", "pid_controller"); 
+  // send(setpoint)  // add the send setpoint function that sends a number or a wordt so the pid contorller can change it,
+  // also add the mode as: testing and not testing, and sending conf etc
+  // add the setpoint list in the conf
   send_pid_controller_conf_data();
   // Serial.println("All handshakes complete. Waiting for data...");
 }
