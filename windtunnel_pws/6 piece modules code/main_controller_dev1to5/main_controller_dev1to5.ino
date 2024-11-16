@@ -207,6 +207,8 @@ Servo servo;
 int angle_pin = 9;
 int count_display = 0;
 int count_logger = 0;
+
+float recieved_angle;
 template<typename T>
 void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
@@ -430,14 +432,15 @@ void setup() {
   // add the setpoint list in the conf
   send_pid_controller_conf_data();
   Serial.println("All handshakes complete. Waiting for data...");
-while(!receiveAcknowledgment(pid_controller, "ACK"){
+  while (!receiveAcknowledgment(pid_controller, "ACK")) {
     sendCommand(pid_controller, "armed", "pid_controller");
     delay(500);
-}
-mode = "pid controller armed";
+  }
+  mode = "pid controller armed";
 }
 
 void loop() {
+  /*
   if (millis() - previousMillis >= 200) {
     loopDuration = millis() - previousMillis;
     loopFrequency = 1000 / loopDuration;
@@ -467,47 +470,53 @@ void loop() {
     Serial.print("status :  ");
     Serial.print(system_status);
     Serial.println(" !");
-*/
-    if (system_status == 1) {
-      mode = "testing active";
-      for (int i = 0; i < total_steps; i++) {
-        setpoint = windspeedList[i];
-        send_setpoint(pid_controller, i);  // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
-        // add a delay so you wait until the angle of the motor is back to the satart angle so you get better meassurments
-        while (recieved_angle - start_angle > 1) {
-          delay(10);
+
+  }
+  */
+  if (system_status == 1) {
+    mode = "testing active";
+    for (int i = 0; i < total_steps; i++) {
+      setpoint = windspeedList[i];
+      //char command = "set:";
+      // const char command = strncat("set:", &extraChar, i);   // Append the character to 'command'
+
+      send_setpoint(pid_controller, i);  // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
+                                         // add a delay so you wait until the angle of the motor is back to the satart angle so you get better meassurments
+      recieved_angle = read_target_from_pwm();
+      while (recieved_angle - start_angle > 1) {
+        delay(10);
+      }
+      for (float j = start_angle; j <= end_angle; j += 0.2) {
+        if (system_status == 0) {
+          break;
         }
-        for (float j = start_angle; j <= end_angle; j += 0.2) {
-          if (system_status == 0) {
-            break;
+        if (millis() - previousMillis >= 200) {
+          prev_millis = millis();
+          sendCommand(pid_controller, "GET", "pid_controller");
+          waitForData(pid_controller, pid_data, 50, "pid_controller");
+
+          sendCommand(meassuring_device, "GET", "measuring_device");
+          waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+
+          command_angle_motor(j);
+
+          if (count_display >= 4) {
+            count_display = 0;
+            send_display_data();
           }
-          if (millis() - previousMillis >= 200) {
-            prev_millis = millis();
-            sendCommand(pid_controller, "GET", "pid_controller");
-            waitForData(pid_controller, pid_data, 50, "pid_controller");
+          count_display++;
+          pitch = read_target_from_pwm();
 
-            sendCommand(meassuring_device, "GET", "measuring_device");
-            waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
-
-            command_angle_motor(j);
-
-            if (count_display >= 4) {
-              count_display = 0;
-              send_display_data();
-            }
-            count_display++;
-            pitch = read_target_from_pwm();
-
-            send_datalogger();
-          }
+          send_datalogger();
         }
       }
-      // send_setpoint(pid_controller, speed_step); // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
-
-
-      // Add additional processing for the received data here
     }
+    // send_setpoint(pid_controller, speed_step); // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
+
+
+    // Add additional processing for the received data here
   }
+
   if (system_status == 0) {
     mode = "armed (waiting)";
     if (millis() - previousMillis >= 200) {
@@ -518,7 +527,7 @@ void loop() {
       sendCommand(meassuring_device, "GET", "measuring_device");
       waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
 
-      command_angle_motor(j);
+      command_angle_motor(0);
 
       if (count_display >= 4) {
         count_display = 0;
@@ -528,6 +537,8 @@ void loop() {
     }
   }
 }
+
+
 void send_datalogger() {
   looptime = millis();
 
@@ -548,10 +559,6 @@ void send_datalogger() {
   };
 
   sendDataWithRetry(sd_card, datatosend, 50, 30);
-}
-void send_setpoint(Stream &serial, int i) {
-  const char command = "set:"+ String(i);
-  serial.write(command, strlen(command));
 }
 
 void send_measuring_device_conf_data() {
@@ -576,7 +583,32 @@ float read_target_from_pwm() {
   float angle = map(pulseWidth, 1000, 2000, 0, 45);
   return angle;
 }
-
+void send_setpoint(Stream &serial, int i) {
+  const char *command;
+  if (i == 0) {
+    command = "set:0";
+  } else if (i == 1) {
+    command = "set:1";
+  } else if (i == 2) {
+    command = "set:2";
+  } else if (i == 3) {
+    command = "set:3";
+  } else if (i == 4) {
+    command = "set:4";
+  } else if (i == 5) {
+    command = "set:5";
+  } else if (i == 6) {
+    command = "set:6";
+  } else if (i == 7) {
+    command = "set:7";
+  } else if (i == 8) {
+    command = "set:8";
+  } else if (i == 9) {
+    command = "set:9";
+  }
+  // Send the "GET" command
+  serial.write(command, strlen(command));
+}
 void send_display_data() {
   float motor_1 = output;
   float motor_2 = output;
@@ -619,8 +651,8 @@ void send_pid_controller_conf_data() {
     i_gain,
     d_gain,
     windspeedCount,
-    windspeedList
   };
+  memcpy(datatosend.windspeedList, windspeedList, sizeof(windspeedList));
   sendDataWithRetry(pid_controller, datatosend, 50, 10);
 }
 // Serialization and deserialization functions for each device

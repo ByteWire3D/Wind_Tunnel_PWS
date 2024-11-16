@@ -130,6 +130,7 @@ float avrg_airspeed;
 bool main_controller_status = false;
 HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 
+int set = 0;
 int led_pin = 8;
 void setup() {
   Serial.begin(115200);
@@ -162,9 +163,9 @@ void setup() {
   // calibrate();
   while (system_status == HIGH) {
     delay(10);
-    digitalwrite(led_pin, HIGH);
+    digitalWrite(led_pin, HIGH);
   }
-  digitalwrite(led_pin, LOW);
+  digitalWrite(led_pin, LOW);
 }
 
 void loop() {
@@ -172,10 +173,9 @@ void loop() {
   unsigned long current_time = millis();
 
   if (system_status == HIGH && main_controller_status == HIGH) {
-    digitalwrite(led_pin, HIGH);
+    digitalWrite(led_pin, HIGH);
     status = 1;
-    // Serial.println(status);
-    // recieve_setpoint();
+    setpoint = windspeedList[set];
     pid_controller_data data_send{
       status,
       setpoint,
@@ -209,15 +209,15 @@ void loop() {
       // Serial.print(",");
       Serial.print(airspeed_filtered);
       Serial.println(",");
-
+      
       //command_motors(1200);
       //airspeed_pid(airspeed, setpoint); // only pid algoritm
-      moving_baseline_pid(airspeed_filtered, setpoint);  // automatic baseline finder + normal pid
+      moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
     }
   }
   if (system_status == LOW) {
 
-    digitalwrite(led_pin, LOW);
+    digitalWrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
 
     avrg_count++;
@@ -766,7 +766,7 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
         Kd = data.d_gain;
 
         windspeedCount = data.windspeedCount;
-        memcpy(windspeedList, sd_data.windspeedList, sizeof(windspeedList));
+        memcpy(windspeedList, data.windspeedList, sizeof(windspeedList));
         Serial.println("cal_airspeed: ");
         Serial.println(correction_value);
         Serial.println("pid_loop-hz: ");
