@@ -479,7 +479,7 @@ void loop() {
         }
         for (float j = start_angle; j <= end_angle; j += 0.2) {
           if (system_status == 0) {
-            return;
+            break;
           }
           if (millis() - previousMillis >= 200) {
             prev_millis = millis();
@@ -566,7 +566,7 @@ void send_measuring_device_conf_data() {
 }
 
 void command_angle_motor(float angle) {
-  float pulsewidth = map(angle, -45, 45, 1000, 2000);
+  float pulsewidth = map(angle, 0, 45, 1000, 2000);
   servo.writeMicroseconds(pulsewidth);
 }
 
@@ -575,7 +575,7 @@ float get_target_from_pwm() {
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
   constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
-  float angle = map(pulseWidth, 1000, 2000, -45, 45);
+  float angle = map(pulseWidth, 1000, 2000, 0, 45);
   return angle;
 }
 
