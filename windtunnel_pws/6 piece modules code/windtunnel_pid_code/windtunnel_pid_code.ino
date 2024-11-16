@@ -175,7 +175,7 @@ void loop() {
     digitalwrite(led_pin, HIGH);
     status = 1;
     // Serial.println(status);
-   // recieve_setpoint();
+    // recieve_setpoint();
     pid_controller_data data_send{
       status,
       setpoint,
@@ -216,6 +216,7 @@ void loop() {
     }
   }
   if (system_status == LOW) {
+
     digitalwrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
 
@@ -877,7 +878,36 @@ void handleCommand(HardwareSerial &serial) {
       Serial.println("armed command received");
       main_controller_status = HIGH;
       sendAcknowledgment(main_controller, "ACK");
-
+    } else if (strcmp(command, "set:0") == 0) {
+      Serial.println("set:0 command received");
+      set = 0;
+    } else if (strcmp(command, "set:1") == 0) {
+      Serial.println("set:1 command received");
+      set = 1;
+    } else if (strcmp(command, "set:2") == 0) {
+      Serial.println("set:2 command received");
+      set = 2;
+    } else if (strcmp(command, "set:3") == 0) {
+      Serial.println("set:3 command received");
+      set = 3;
+    } else if (strcmp(command, "set:4") == 0) {
+      Serial.println("set:4 command received");
+      set = 4;
+    } else if (strcmp(command, "set:5") == 0) {
+      Serial.println("set:5 command received");
+      set = 5;
+    } else if (strcmp(command, "set:6") == 0) {
+      Serial.println("set:6 command received");
+      set = 6;
+    } else if (strcmp(command, "set:7") == 0) {
+      Serial.println("set:7 command received");
+      set = 7;
+    } else if (strcmp(command, "set:8") == 0) {
+      Serial.println("set:8 command received");
+      set = 8;
+    } else if (strcmp(command, "set:9") == 0) {
+      Serial.println("set:9 command received");
+      set = 9;
     } else {
       //Serial.print("other data recieved: ");
       //Serial.println(command);

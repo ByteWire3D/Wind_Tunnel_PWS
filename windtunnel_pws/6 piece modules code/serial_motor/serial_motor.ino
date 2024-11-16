@@ -18,9 +18,9 @@ HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 //pid related vars
-float kp = 5;
-float kd = 0.3;
-float ki = 0.00;
+float kp = 10;
+float kd = 0.4;
+float ki = 0.2;
 
 long prevT = 0;
 float eprev = 0;
@@ -45,7 +45,7 @@ Servo angle_out;
 
 int pos_offset = 4;
 int subzero_offset;
-
+bool calibarted = false;
 void setup() {
   Serial.begin(115200);
   //assing all the pins as in or outputs
@@ -82,16 +82,17 @@ void loop() {
     Serial.println(target);
     clearSerialBuffer();
   }
-
+  
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 20) {  // 50hz loop rate
     previousMillis = currentMillis;
-    //target = get_target_from_pwm();
+   // target = read_target_from_pwm();
     // get target position
     PID_motor(target);
 
     send_angle_pwm(curr_angle);
   }
+  
   /*
   target = 0;
 
@@ -99,7 +100,7 @@ void loop() {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= 25) {
       previousMillis = currentMillis;
-      //  target = get_target_from_pwm();
+      //  target = read_target_from_pwm();
       // get target position
       PID_motor(target);
 
@@ -109,12 +110,12 @@ void loop() {
   for (float i = 0; i <= 45; i += 0.2) {
     target = i;
     prevMillis = millis();
-    while (millis() - prevMillis <= 50) {
+    while (millis() - prevMillis <= 200) {
 
       unsigned long currentMillis = millis();
       if (currentMillis - previousMillis >= 25) {
         previousMillis = currentMillis;
-        //  target = get_target_from_pwm();
+        //  target = read_target_from_pwm();
         // get target position
         PID_motor(target);
 
@@ -140,7 +141,7 @@ void setMotor(int dir, float pwmVal, int out1, int out2) {
   }
 }
 
-float get_target_from_pwm() {
+float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(PWM_PIN, HIGH);
   pulseWidth = constrain(pulseWidth, 1000, 2000);
@@ -156,7 +157,7 @@ void send_angle_pwm(float actual_angle) {
 
 void PID_motor(float target_angle) {
 
-  target_angle = constrain(target_angle, 0, 45);
+  target_angle = constrain(target_angle, 0, 70);
   target_angle *= degtopos;  // convert target for deg to rotations.
 
   angle_pos = target_angle - pos_offset;
@@ -183,19 +184,22 @@ void PID_motor(float target_angle) {
     dir = -1;
   }
 
-  if (pos < 0 && dir == 1) {
-    subzero_offset = 20;
+  if (angle_pos / degtopos < 20 && dir == -1) {
+    kp = 7;
   } else {
-    subzero_offset = 0;
+   kp = 10;
   }
-  float pwr = fabs(u) + 65 + subzero_offset;
+  float pwr = fabs(u) + 65;
 
   if (pwr > 255) {
     pwr = 255;
   }
-  if (pwr <= 65) {
+  if (abs(e) <= 1) {
     pwr = 0;
   }
+  //if (pwr <= 65) {
+  //  pwr = 0;
+ // }
 
   setMotor(dir, pwr, motor1, motor2);  //set the signal to the motor
 
@@ -242,7 +246,7 @@ void PID_motor(float target_angle) {
 
 void find_endpoint() {
   while (!encoder_trigger) {
-    setMotor(1, 100, motor1, motor2);
+    setMotor(1, 200, motor1, motor2);
     Serial.println("direction: 1");
     delay(10);
   }
@@ -268,9 +272,13 @@ void IRAM_ATTR readEncoder() {
 void IRAM_ATTR readEndstop() {
   encoder_trigger = HIGH;
   endstop_pressed = true;
-  portENTER_CRITICAL(&mux);
-  posi = 0;  // Reset encoder position
-  portEXIT_CRITICAL(&mux);
+  if (!calibarted) {
+    portENTER_CRITICAL(&mux);
+    posi = 0;  // Reset encoder position
+    portEXIT_CRITICAL(&mux);
+    calibarted = true;
+  }
+
   Serial.println("endstop pressed!!!!!!!!!!");
 }
 void clearSerialBuffer() {

@@ -472,7 +472,7 @@ void loop() {
       mode = "testing active";
       for (int i = 0; i < total_steps; i++) {
         setpoint = windspeedList[i];
-        // send_setpoint(pid_controller, speed_step); // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
+        send_setpoint(pid_controller, i);  // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
         // add a delay so you wait until the angle of the motor is back to the satart angle so you get better meassurments
         while (recieved_angle - start_angle > 1) {
           delay(10);
@@ -496,6 +496,7 @@ void loop() {
               send_display_data();
             }
             count_display++;
+            pitch = read_target_from_pwm();
 
             send_datalogger();
           }
@@ -549,11 +550,8 @@ void send_datalogger() {
   sendDataWithRetry(sd_card, datatosend, 50, 30);
 }
 void send_setpoint(Stream &serial, int i) {
-  float setpoint_ = windspeedList[i];
-  setpoint_data data{
-    setpoint_
-  };
-  sendDataWithRetry(serial, data, 50, 10);
+  const char command = "set:"+ String(i);
+  serial.write(command, strlen(command));
 }
 
 void send_measuring_device_conf_data() {
@@ -570,7 +568,7 @@ void command_angle_motor(float angle) {
   servo.writeMicroseconds(pulsewidth);
 }
 
-float get_target_from_pwm() {
+float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
   constrain(pulseWidth, 1000, 2000);
