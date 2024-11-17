@@ -54,7 +54,7 @@ float d_out;
 
 int system_status;
 String status = "";
-String mode = "";
+int mode;
 #pragma pack(1)
 // Define data structures for each device
 struct Config_data {
@@ -171,7 +171,7 @@ struct Display_data {
   float wattage;
   float mah_used;
   int status;
-  String mode;
+  int mode;
   int time_seconds;
   float p_out;
   float i_out;
@@ -202,13 +202,14 @@ float loopFrequency = 0;           // Store loop frequency
 
 unsigned long prev_millis = 0;  // Store last loop time
 unsigned long loopDuration = 0;
-int servo_pin = 10;
+int servo_pin = 9;
 Servo servo;
-int angle_pin = 9;
+int angle_pin = 10;
 int count_display = 0;
 int count_logger = 0;
 
 float recieved_angle;
+bool executed = false;
 template<typename T>
 void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
@@ -295,6 +296,7 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
 
 
       } else if (deviceName == "meassuring_device") {
+
         lift_loadcell = meassurment_data.lift_loadcell;
         drag_loadcell = meassurment_data.drag_loadcell;
 
@@ -324,41 +326,51 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
         Serial.print("\n");
 */
       } else if (deviceName == "pid_controller") {
+
         system_status = pid_data.system_status;
+        setpoint = pid_data.setpoint;
+        airspeed = pid_data.airspeed;
+        error = pid_data.error;
+        output = pid_data.output;
+        baseline = pid_data.baseline;
+        p_out = pid_data.p_out;
+        i_out = pid_data.i_out;
+        d_out = pid_data.d_out;
+        /*
         Serial.print("System Status: ");
         Serial.println(system_status);
 
-        setpoint = pid_data.setpoint;
+
         Serial.print("Setpoint: ");
         Serial.println(setpoint);
 
-        airspeed = pid_data.airspeed;
+
         Serial.print("Airspeed: ");
         Serial.println(airspeed);
 
-        error = pid_data.error;
+
         Serial.print("Error: ");
         Serial.println(error);
 
-        output = pid_data.output;
+
         Serial.print("Output: ");
         Serial.println(output);
 
-        baseline = pid_data.baseline;
         Serial.print("Baseline: ");
         Serial.println(baseline);
 
-        p_out = pid_data.p_out;
+
         Serial.print("P_out: ");
         Serial.println(p_out);
 
-        i_out = pid_data.i_out;
+
         Serial.print("I_out: ");
         Serial.println(i_out);
 
-        d_out = pid_data.d_out;
+
         Serial.print("D_out: ");
         Serial.println(d_out);
+        */
       }
 
       return;
@@ -435,8 +447,10 @@ void setup() {
   while (!receiveAcknowledgment(pid_controller, "ACK")) {
     sendCommand(pid_controller, "armed", "pid_controller");
     delay(500);
+    Serial.println("sending armed command");
   }
-  mode = "pid controller armed";
+  mode = 1;  // "pid controller armed"
+  Serial.println("entering loop");
 }
 
 void loop() {
@@ -474,40 +488,54 @@ void loop() {
   }
   */
   if (system_status == 1) {
-    mode = "testing active";
+    mode = 2;  //"testing active"
+    Serial.println("system on running the test --->");
     for (int i = 0; i < total_steps; i++) {
       setpoint = windspeedList[i];
-      //char command = "set:";
-      // const char command = strncat("set:", &extraChar, i);   // Append the character to 'command'
 
-      send_setpoint(pid_controller, i);  // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
-                                         // add a delay so you wait until the angle of the motor is back to the satart angle so you get better meassurments
+     
+      while (!receiveAcknowledgment(pid_controller, "ACK")) {
+        send_setpoint(pid_controller, i);
+        delay(50);
+        Serial.println("sending setpoint");
+      }
+      Serial.println(setpoint);
       recieved_angle = read_target_from_pwm();
-      while (recieved_angle - start_angle > 1) {
-        delay(10);
+      Serial.println(recieved_angle);
+
+      while (abs(start_angle - recieved_angle) > 0.5) {
+        recieved_angle = read_target_from_pwm();
+        Serial.println(recieved_angle);
+        delay(100);
       }
       for (float j = start_angle; j <= end_angle; j += 0.2) {
-        if (system_status == 0) {
-          break;
-        }
-        if (millis() - previousMillis >= 200) {
-          prev_millis = millis();
-          sendCommand(pid_controller, "GET", "pid_controller");
-          waitForData(pid_controller, pid_data, 50, "pid_controller");
+      //  if (system_status == 0) {
+        //  break;
+      //  }
+        Serial.println(j);
+        executed = false;
+        previousMillis = millis();
+        while (millis() - previousMillis <= 100) {
+          if (executed == false) {
+           // sendCommand(pid_controller, "GET", "pid_controller");
+           // waitForData(pid_controller, pid_data, 50, "pid_controller");
+           // if (system_status == 0) {
+           //   return;
+           // }
+           // sendCommand(meassuring_device, "GET", "measuring_device");
+           // waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+            command_angle_motor(j);
+            pitch = read_target_from_pwm();
+            if (count_display >= 4) {
+              count_display = 0;
+              send_display_data();
+            }
+            count_display++;
 
-          sendCommand(meassuring_device, "GET", "measuring_device");
-          waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
 
-          command_angle_motor(j);
-
-          if (count_display >= 4) {
-            count_display = 0;
-            send_display_data();
+          //  send_datalogger();
+            executed = true;
           }
-          count_display++;
-          pitch = read_target_from_pwm();
-
-          send_datalogger();
         }
       }
     }
@@ -518,20 +546,21 @@ void loop() {
   }
 
   if (system_status == 0) {
-    mode = "armed (waiting)";
+    mode = 3;  // "armed (waiting)"
     if (millis() - previousMillis >= 200) {
-      prev_millis = millis();
+      previousMillis = millis();
       sendCommand(pid_controller, "GET", "pid_controller");
-      waitForData(pid_controller, pid_data, 50, "pid_controller");
+      waitForData(pid_controller, pid_data, 100, "pid_controller");
 
       sendCommand(meassuring_device, "GET", "measuring_device");
-      waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+      waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
 
       command_angle_motor(0);
 
       if (count_display >= 4) {
         count_display = 0;
         send_display_data();
+        Serial.println("system off");
       }
       count_display++;
     }
@@ -567,18 +596,18 @@ void send_measuring_device_conf_data() {
     calibrationValue_Drag,
     calibrationValue_Ampere
   };
-  sendDataWithRetry(meassuring_device, datatosend, 50, 10);
+  sendDataWithRetry(meassuring_device, datatosend, 50, 30);
 }
 
 void command_angle_motor(float angle) {
-  float pulsewidth = map(angle, 0, 45, 1000, 2000);
+  unsigned long pulsewidth = map(angle, 0, 45, 1000, 2000);
   servo.writeMicroseconds(pulsewidth);
 }
 
 float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
-  constrain(pulseWidth, 1000, 2000);
+  pulseWidth = constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
   float angle = map(pulseWidth, 1000, 2000, 0, 45);
   return angle;
@@ -586,25 +615,25 @@ float read_target_from_pwm() {
 void send_setpoint(Stream &serial, int i) {
   const char *command;
   if (i == 0) {
-    command = "set:0";
+    command = "s:0";
   } else if (i == 1) {
-    command = "set:1";
+    command = "s:1";
   } else if (i == 2) {
-    command = "set:2";
+    command = "s:2";
   } else if (i == 3) {
-    command = "set:3";
+    command = "s:3";
   } else if (i == 4) {
-    command = "set:4";
+    command = "s:4";
   } else if (i == 5) {
-    command = "set:5";
+    command = "s:5";
   } else if (i == 6) {
-    command = "set:6";
+    command = "s:6";
   } else if (i == 7) {
-    command = "set:7";
+    command = "s:7";
   } else if (i == 8) {
-    command = "set:8";
+    command = "s:8";
   } else if (i == 9) {
-    command = "set:9";
+    command = "s:9";
   }
   // Send the "GET" command
   serial.write(command, strlen(command));

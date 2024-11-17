@@ -34,7 +34,7 @@ float wattage;
 float mah_used;
 
 int status;
-String mode;
+int mode;
 
 String error_flags;
 int time_seconds;
@@ -81,7 +81,7 @@ struct display_data_recv {
   float wattage;
   float mah_used;
   int status;
-  String mode;
+  int mode;
   int time_seconds;
   float p_out;
   float i_out;
@@ -92,6 +92,7 @@ struct display_data_recv {
 };
 #pragma pack()
 String status_text = "";
+String mode_text = "";
 display_data_recv display_recv;
 
 bool recieve = false;
@@ -119,7 +120,7 @@ void loop() {
     if (!recieve) {
       count++;
     }
-    if (count >=  4) {
+    if (count >= 4) {
       status = 3;
       show_display();
     }
@@ -185,7 +186,7 @@ void processInput(String input) {
   }
 
   else if (id == "mode") {  // Timestamp
-    mode = value;
+    mode = value.toInt();
   } else if (id == "time") {  // Timestamp
     time_seconds = value.toInt();
   }
@@ -624,9 +625,18 @@ void show_mode() {
   tft.setTextColor(ST77XX_ORANGE, ST77XX_BLACK);
   tft.print("Mode: ");
   tft.setCursor(start_x_middel + calculate_Length("mode: ", 1), start_y + word_spacing * word_count + list_spacing * list_count);  // links boven in
-  tft.setTextColor(ST77XX_SLPIN, ST77XX_BLACK);
   tft.setTextSize(1);
-  tft.print(String(mode) + "                           ");
+  if (mode == 1) {
+    tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+    mode_text = "pid controller armed!";
+  } else if (mode == 2) {
+    tft.setTextColor(ST77XX_RED, ST77XX_BLACK);
+    mode_text = "testing active";
+  } else if (mode == 3) {
+    tft.setTextColor(ST77XX_YELLOW, ST77XX_BLACK);
+    mode_text = "armed (waiting)";
+  }
+  tft.print(mode_text + "                           ");
   list_count++;
 }
 
@@ -778,7 +788,7 @@ void recieveData_nodelay(HardwareSerial &serial, T &data, const char *deviceName
   if (receiveData(serial, data)) {
     if (deviceName == "main_controller") {
       recieve = true;
-      count =0;
+      count = 0;
       file_name = data.file_name;
       setpoint = data.setpoint;
 

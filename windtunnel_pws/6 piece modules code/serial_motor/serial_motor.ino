@@ -46,6 +46,8 @@ Servo angle_out;
 int pos_offset = 4;
 int subzero_offset;
 bool calibarted = false;
+
+float prev_target = 0;
 void setup() {
   Serial.begin(115200);
   //assing all the pins as in or outputs
@@ -71,7 +73,7 @@ void setup() {
 
 
   // while (!main_controller) { delay(10); }
-  while (!Serial) { delay(10); }
+  // while (!Serial) { delay(10); }
   //delay(2000);
   find_endpoint();
 }
@@ -82,17 +84,18 @@ void loop() {
     Serial.println(target);
     clearSerialBuffer();
   }
-  
+
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 20) {  // 50hz loop rate
     previousMillis = currentMillis;
-   // target = read_target_from_pwm();
+    target = read_target_from_pwm();
+
     // get target position
     PID_motor(target);
 
     send_angle_pwm(curr_angle);
   }
-  
+
   /*
   target = 0;
 
@@ -147,11 +150,31 @@ float read_target_from_pwm() {
   pulseWidth = constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
   float target = map(pulseWidth, 1000, 2000, 0, 45);
+
+  float diff = target - prev_target;
+  if (diff < 10) {
+    if (target > prev_target) {
+      target = target;  // do nothing target is bigger that the prev target
+    } else {
+      target = prev_target;  // always chose the bigget angle
+    }
+
+  } else {
+    target = target;  // do nothing, let it change to the smaller angle if diff is bigg enough
+  }
+  Serial.print("target recieved:");
+  Serial.print(target);
+  Serial.print("\t");
+  Serial.println(pulseWidth);
+  prev_target = target;
   return target;
 }
 
 void send_angle_pwm(float actual_angle) {
-  float pulsewidth = map(actual_angle, 0, 45, 1000, 2000);
+  unsigned long pulsewidth = map(actual_angle, 0, 45, 1000, 2000);
+  Serial.print(actual_angle);
+  Serial.print("\t");
+  Serial.println(pulsewidth);
   angle_out.writeMicroseconds(pulsewidth);
 }
 
@@ -187,7 +210,7 @@ void PID_motor(float target_angle) {
   if (angle_pos / degtopos < 20 && dir == -1) {
     kp = 7;
   } else {
-   kp = 10;
+    kp = 10;
   }
   float pwr = fabs(u) + 65;
 
@@ -199,7 +222,7 @@ void PID_motor(float target_angle) {
   }
   //if (pwr <= 65) {
   //  pwr = 0;
- // }
+  // }
 
   setMotor(dir, pwr, motor1, motor2);  //set the signal to the motor
 
@@ -245,10 +268,18 @@ void PID_motor(float target_angle) {
 }
 
 void find_endpoint() {
+  prevMillis = 0;
   while (!encoder_trigger) {
     setMotor(1, 200, motor1, motor2);
     Serial.println("direction: 1");
     delay(10);
+    if (millis() - prevMillis >= 5000) {
+      prevMillis = millis();
+      Serial.println("move other way -->");
+      Serial.println("direction: -1");
+      setMotor(-1, 200, motor1, motor2);
+      delay(2000);
+    }
   }
   if (endstop_pressed) {
     setMotor(0, 0, motor1, motor2);

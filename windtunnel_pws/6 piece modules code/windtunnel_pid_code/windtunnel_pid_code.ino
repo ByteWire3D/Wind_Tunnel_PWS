@@ -162,10 +162,18 @@ void setup() {
   // Calibrate the sensor
   // calibrate();
   while (system_status == HIGH) {
-    delay(10);
+    delay(100);
     digitalWrite(led_pin, HIGH);
+    Serial.println("system status high");
   }
   digitalWrite(led_pin, LOW);
+  Serial.println("entering the loop --- >");
+  Serial.println(system_status);
+
+  while (!main_controller_status) {
+    handleCommand(main_controller);
+    Serial.println("waiting");
+  }
 }
 
 void loop() {
@@ -192,6 +200,7 @@ void loop() {
     if (current_time - previous_time >= interval) {
       previous_time = millis();
       Serial.println("system is on!-->>>>>");
+      Serial.println(setpoint);
       //Read raw pressure values from sensor
 
       // airspeed = calc_airspeed_moving_filter();
@@ -199,8 +208,8 @@ void loop() {
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
-      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-
+      //  airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+      airspeed_filtered = 0;
       avrg_count++;
       avrg_airspeed += airspeed_filtered;
 
@@ -209,17 +218,20 @@ void loop() {
       // Serial.print(",");
       Serial.print(airspeed_filtered);
       Serial.println(",");
-      
+
       //command_motors(1200);
       //airspeed_pid(airspeed, setpoint); // only pid algoritm
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
     }
   }
   if (system_status == LOW) {
-
+    if (current_time - previous_time >= 1000) {
+      previous_time = millis();
+      Serial.println("system is off");
+    }
     digitalWrite(led_pin, LOW);
-    airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-
+    //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+    airspeed_filtered = 0;
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
@@ -266,10 +278,6 @@ void loop() {
 
     motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
     motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
-    if (current_time - previous_time >= 1000) {
-      previous_time = millis();
-      Serial.println("system is off");
-    }
   }
 }
 
@@ -859,10 +867,61 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       Serial.println("GET command received");
       avrg_count = 0;
       avrg_airspeed = 0;
-      sendDataWithRetry(main_controller, datatosend, 30, 25);
-    } else {
-      //Serial.print("other data recieved: ");
-      //Serial.println(command);
+      sendDataWithRetry(main_controller, datatosend, 50, 25);
+    }  else if (strcmp(command, "TGE") == 0) {
+      Serial.println("TGE command received");
+      avrg_count = 0;
+      avrg_airspeed = 0;
+      sendDataWithRetry(main_controller, datatosend, 50, 25);
+    } else if (strcmp(command, "ETG") == 0) {
+      Serial.println("ETG command received");
+      avrg_count = 0;
+      avrg_airspeed = 0;
+      sendDataWithRetry(main_controller, datatosend, 50, 25);
+    }else if (strcmp(command, "s:0") == 0) {
+      Serial.println("s:0 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 0;
+    } else if (strcmp(command, "s:1") == 0) {
+      Serial.println("s:1 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 1;
+    } else if (strcmp(command, "s:2") == 0) {
+      Serial.println("s:2 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 2;
+    } else if (strcmp(command, "s:3") == 0) {
+      Serial.println("s:3 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 3;
+    } else if (strcmp(command, "s:4") == 0) {
+      Serial.println("s:4 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 4;
+    } else if (strcmp(command, "s:5") == 0) {
+      Serial.println("s:5 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 5;
+    } else if (strcmp(command, "s:6") == 0) {
+      Serial.println("s:6 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 6;
+    } else if (strcmp(command, "s:7") == 0) {
+      Serial.println("s:7 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 7;
+    } else if (strcmp(command, "s:8") == 0) {
+      Serial.println("s:8 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 8;
+    } else if (strcmp(command, "s:9") == 0) {
+      Serial.println("s:9 command received");
+      sendAcknowledgment(main_controller, "ACK");
+      set = 9;
+    } 
+     else {
+      Serial.print("other data recieved: ");
+      Serial.println(command);
       clearSerialBuffer(serial);
     }
   }
@@ -878,39 +937,9 @@ void handleCommand(HardwareSerial &serial) {
       Serial.println("armed command received");
       main_controller_status = HIGH;
       sendAcknowledgment(main_controller, "ACK");
-    } else if (strcmp(command, "set:0") == 0) {
-      Serial.println("set:0 command received");
-      set = 0;
-    } else if (strcmp(command, "set:1") == 0) {
-      Serial.println("set:1 command received");
-      set = 1;
-    } else if (strcmp(command, "set:2") == 0) {
-      Serial.println("set:2 command received");
-      set = 2;
-    } else if (strcmp(command, "set:3") == 0) {
-      Serial.println("set:3 command received");
-      set = 3;
-    } else if (strcmp(command, "set:4") == 0) {
-      Serial.println("set:4 command received");
-      set = 4;
-    } else if (strcmp(command, "set:5") == 0) {
-      Serial.println("set:5 command received");
-      set = 5;
-    } else if (strcmp(command, "set:6") == 0) {
-      Serial.println("set:6 command received");
-      set = 6;
-    } else if (strcmp(command, "set:7") == 0) {
-      Serial.println("set:7 command received");
-      set = 7;
-    } else if (strcmp(command, "set:8") == 0) {
-      Serial.println("set:8 command received");
-      set = 8;
-    } else if (strcmp(command, "set:9") == 0) {
-      Serial.println("set:9 command received");
-      set = 9;
-    } else {
-      //Serial.print("other data recieved: ");
-      //Serial.println(command);
+    }  else {
+      Serial.print("other data recieved: ");
+      Serial.println(command);
       clearSerialBuffer(serial);
     }
   }
