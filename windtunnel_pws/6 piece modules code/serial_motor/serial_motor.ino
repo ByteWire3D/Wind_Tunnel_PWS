@@ -66,7 +66,7 @@ void setup() {
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
   angle_out.setPeriodHertz(50);  // standard 50 hz esc signal
-  angle_out.attach(angleOUT_pin, 1000, 2000);
+  angle_out.attach(angleOUT_pin, 500, 2500);
   //attach the interupts;
   attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
   attachInterrupt(digitalPinToInterrupt(ENDSTOP), readEndstop, FALLING);
@@ -126,7 +126,7 @@ void loop() {
       }
     }
   }
-  */
+*/
 }
 
 
@@ -146,11 +146,12 @@ void setMotor(int dir, float pwmVal, int out1, int out2) {
 
 float read_target_from_pwm() {
   // Read the pulse width in microseconds
-  unsigned long pulseWidth = pulseIn(PWM_PIN, HIGH);
-  pulseWidth = constrain(pulseWidth, 1000, 2000);
+  unsigned long pulseWidth = pulseIn(20, HIGH);
+  // pulseWidth = constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
-  float target = map(pulseWidth, 1000, 2000, 0, 45);
-
+  float target = map(pulseWidth, 500, 2500, 0, 4500);
+  target /= 100;
+  /*
   float diff = target - prev_target;
   if (diff < 10) {
     if (target > prev_target) {
@@ -160,18 +161,22 @@ float read_target_from_pwm() {
     }
 
   } else {
-    target = target;  // do nothing, let it change to the smaller angle if diff is bigg enough
+    target = 
+    target;  // do nothing, let it change to the smaller angle if diff is bigg enough
   }
+  */
   Serial.print("target recieved:");
   Serial.print(target);
   Serial.print("\t");
   Serial.println(pulseWidth);
-  prev_target = target;
+  target = constrain(target, 0, 45);
+  // prev_target = target;
   return target;
 }
 
 void send_angle_pwm(float actual_angle) {
-  unsigned long pulsewidth = map(actual_angle, 0, 45, 1000, 2000);
+  actual_angle *= 100;
+  unsigned long pulsewidth = map(actual_angle, 0, 4500, 500, 2500);
   Serial.print(actual_angle);
   Serial.print("\t");
   Serial.println(pulsewidth);
@@ -227,7 +232,7 @@ void PID_motor(float target_angle) {
   setMotor(dir, pwr, motor1, motor2);  //set the signal to the motor
 
   eprev = e;
-  curr_angle = pos / degtopos;
+  curr_angle = (pos +4) / degtopos;
 
   Serial.print("Target: ");
   Serial.print(angle_pos);
@@ -250,7 +255,7 @@ void PID_motor(float target_angle) {
   Serial.print("\t");
 
   Serial.print("target_angle: ");
-  Serial.print(angle_pos / degtopos);
+  Serial.print((angle_pos+ 4) / degtopos);
   Serial.print("\t");
 
   Serial.print("direction: ");
@@ -278,7 +283,7 @@ void find_endpoint() {
       Serial.println("move other way -->");
       Serial.println("direction: -1");
       setMotor(-1, 200, motor1, motor2);
-      delay(2000);
+      delay(700);
     }
   }
   if (endstop_pressed) {

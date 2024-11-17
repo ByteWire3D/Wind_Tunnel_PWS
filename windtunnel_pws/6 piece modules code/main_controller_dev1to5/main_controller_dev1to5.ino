@@ -202,9 +202,9 @@ float loopFrequency = 0;           // Store loop frequency
 
 unsigned long prev_millis = 0;  // Store last loop time
 unsigned long loopDuration = 0;
-int servo_pin = 9;
+int servo_pin = 10;
 Servo servo;
-int angle_pin = 10;
+int angle_pin = 9;
 int count_display = 0;
 int count_logger = 0;
 
@@ -399,8 +399,9 @@ void setup() {
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
   servo.setPeriodHertz(50);  // standard 50 hz esc signal
-  servo.attach(servo_pin, 1000, 2000);
-
+  servo.attach(servo_pin, 500, 2500);
+  pinMode(angle_pin, INPUT);
+  command_angle_motor(0);
   if (!performHandshake(sd_card, 5000)) {
     Serial.println("sd_card communication failed.");
   }
@@ -493,7 +494,7 @@ void loop() {
     for (int i = 0; i < total_steps; i++) {
       setpoint = windspeedList[i];
 
-     
+
       while (!receiveAcknowledgment(pid_controller, "ACK")) {
         send_setpoint(pid_controller, i);
         delay(50);
@@ -504,26 +505,29 @@ void loop() {
       Serial.println(recieved_angle);
 
       while (abs(start_angle - recieved_angle) > 0.5) {
+        command_angle_motor(0);
         recieved_angle = read_target_from_pwm();
+        Serial.print("recieved angle:");
         Serial.println(recieved_angle);
         delay(100);
       }
       for (float j = start_angle; j <= end_angle; j += 0.2) {
-      //  if (system_status == 0) {
-        //  break;
-      //  }
+        if (system_status == 0) {
+          break;
+        }
+        Serial.print("angle:");
         Serial.println(j);
         executed = false;
         previousMillis = millis();
-        while (millis() - previousMillis <= 100) {
+        while (millis() - previousMillis <= 200) {
           if (executed == false) {
-           // sendCommand(pid_controller, "GET", "pid_controller");
-           // waitForData(pid_controller, pid_data, 50, "pid_controller");
-           // if (system_status == 0) {
-           //   return;
-           // }
-           // sendCommand(meassuring_device, "GET", "measuring_device");
-           // waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+            sendCommand(pid_controller, "GET", "pid_controller");
+            waitForData(pid_controller, pid_data, 50, "pid_controller");
+            if (system_status == 0) {
+              break;
+            }
+            sendCommand(meassuring_device, "GET", "measuring_device");
+            waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
             command_angle_motor(j);
             pitch = read_target_from_pwm();
             if (count_display >= 4) {
@@ -533,7 +537,7 @@ void loop() {
             count_display++;
 
 
-          //  send_datalogger();
+            send_datalogger();
             executed = true;
           }
         }
@@ -600,16 +604,21 @@ void send_measuring_device_conf_data() {
 }
 
 void command_angle_motor(float angle) {
-  unsigned long pulsewidth = map(angle, 0, 45, 1000, 2000);
+  angle *= 100;
+  unsigned long pulsewidth = map(angle, 0, 4500, 500, 2500);
+  Serial.println(pulsewidth);
   servo.writeMicroseconds(pulsewidth);
 }
 
 float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
-  pulseWidth = constrain(pulseWidth, 1000, 2000);
+  Serial.print(pulseWidth);
+  Serial.print("\t");
+  //pulseWidth = constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
-  float angle = map(pulseWidth, 1000, 2000, 0, 45);
+  float angle = map(pulseWidth, 100, 500, 0, 4500);
+  angle /= 100;
   return angle;
 }
 void send_setpoint(Stream &serial, int i) {
