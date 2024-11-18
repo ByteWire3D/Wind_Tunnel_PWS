@@ -561,10 +561,8 @@ void loop() {
         }
       }
     }
-    // send_setpoint(pid_controller, speed_step); // do this via send command and then just 1 |or via pwm and then decode to numbers when in range
-
-
-    // Add additional processing for the received data here
+    // test is done set all the values to 0 and off
+   test_is_done();    
   }
 
   if (kill_switch_status == LOW) {  // systemstatus != kill_switch_status
@@ -589,7 +587,25 @@ void loop() {
   }
 }
 
+void test_is_done(){
+    pinMode(killswitch_pin_notpressed, OUTPUT);
 
+    digitalWrite(killswitch_pin_notpressed, HIGH);
+    delay(200);
+    digitalWrite(killswitch_pin_notpressed, LOW);
+    pinMode(killswitch_pin_notpressed, INPUT_PULLUP);
+    command_angle_motor(0);
+    kill_switch_status = LOW;
+    count_display = 4;
+/*
+      while (!receiveAcknowledgment(pid_controller, "ACK")) {
+        send_setpoint(pid_controller, 0);
+        delay(50);
+        Serial.println("sending setpoint");
+    }
+    */
+ 
+}
 void send_datalogger() {
   looptime = millis();
 
