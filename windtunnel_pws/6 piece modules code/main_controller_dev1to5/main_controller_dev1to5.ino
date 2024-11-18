@@ -540,12 +540,12 @@ void loop() {
         while (millis() - previousMillis <= 200) {
           if (executed == false) {
             sendCommand(pid_controller, "GET", "pid_controller");
-            waitForData(pid_controller, pid_data, 50, "pid_controller");
+            waitForData(pid_controller, pid_data, 90, "pid_controller");
             if (kill_switch_status == LOW) {
               break;
             }
             sendCommand(meassuring_device, "GET", "measuring_device");
-            waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");
+            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
             command_angle_motor(j);
             pitch = read_target_from_pwm();
             if (count_display >= 4) {
