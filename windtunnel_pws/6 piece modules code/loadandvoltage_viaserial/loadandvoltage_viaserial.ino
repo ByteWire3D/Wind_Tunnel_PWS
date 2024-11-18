@@ -483,8 +483,16 @@ bool handleGetCommand(HardwareSerial &serial) {
       Serial.println("GET command received");
       return true;
       // Call the function to send data with retry
-      //sendDataWithRetry(serial, dataToSend, 50, 10);
-    } else {
+     // sendDataWithRetry(serial, dataToSend, 50, 25); // this was commended fucking dumb mistake // never mind other function
+    } else if (strcmp(command, "TGE") == 0) {
+      Serial.println("TGE command received");
+       return true;
+     // sendDataWithRetry(serial, dataToSend, 50, 25);
+    } else if (strcmp(command, "ETG") == 0) {
+      Serial.println("ETG command received");
+       return true;
+     // sendDataWithRetry(serial, dataToSend, 50, 25);
+    }else {
       return false;
     }
   }
