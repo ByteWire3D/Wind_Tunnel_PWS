@@ -17,7 +17,7 @@ struct config_pid_controller {
 };
 
 struct pid_controller_data {
-  int status;
+  //int status;
   float setpoint;
   float airspeed;
   float error;
@@ -186,10 +186,10 @@ void loop() {
 
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
-    status = 1;
+   // status = 1;
     setpoint = windspeedList[set];
     pid_controller_data data_send{
-      status,
+     // status,
       setpoint,
       avrg_airspeed,
       error,
@@ -243,9 +243,9 @@ void loop() {
 
     avrg_airspeed / avrg_count;
 
-    status = 0;
+   // status = 0;
     pid_controller_data data_send{
-      status,
+      //status,
       setpoint,
       avrg_airspeed,
       error,
@@ -479,24 +479,18 @@ void killswitch() {
 void stopswitch(){
    unsigned long interrupt_time = millis();
 
-
-
-
   // Debounce: Ignore interrupt if triggered within the last 200ms
   if (interrupt_time - last_interrupt_time > 200) {
     // Toggle the system state
-    stop = !stop;
-
-
-
+    system_status = LOW;
 
     // Motor control based on the new state
-    if (system_status == LOW) {  // kill the motors
+     // kill the motors
       motor1.writeMicroseconds(minPulseWidth);
       motor2.writeMicroseconds(minPulseWidth);
       motor_signal1 = 1000;
       motor_signal2 = 1000;
-      //setpoint = 0;
+      setpoint = 0;
       integral = 0;
       derivative = 0;
       previousError = 0;
@@ -506,9 +500,7 @@ void stopswitch(){
       output = 1000;
       baseline_motor_signal = 1000;
       previous_output = 1000;
-    }
-    if (system_status == HIGH) {
-    }
+
     // Update the last interrupt time
     last_interrupt_time = interrupt_time;
   }

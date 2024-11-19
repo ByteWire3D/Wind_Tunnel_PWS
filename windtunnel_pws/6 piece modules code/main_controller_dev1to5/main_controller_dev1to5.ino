@@ -52,7 +52,7 @@ float p_out;
 float i_out;
 float d_out;
 
-int system_status;
+int system_status = 0;
 String status = "";
 int mode;
 #pragma pack(1)
@@ -139,7 +139,7 @@ struct Messurment_data {
 
 
 struct pid_controller_data {
-  int system_status;
+  //int system_status;
   float setpoint;
   float airspeed;
   float error;
@@ -332,7 +332,7 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
 */
       } else if (deviceName == "pid_controller") {
 
-        system_status = pid_data.system_status;
+       // system_status = pid_data.system_status;
         setpoint = pid_data.setpoint;
         airspeed = pid_data.airspeed;
         error = pid_data.error;
@@ -500,6 +500,7 @@ void loop() {
   */
   if (kill_switch_status == HIGH) { // systemstatus != kill_switch_status
     mode = 2;  //"testing active"
+    system_status = 1;
     Serial.println("system on running the test --->");
     for (int i = 0; i < total_steps; i++) {
       setpoint = windspeedList[i];
@@ -567,6 +568,7 @@ void loop() {
 
   if (kill_switch_status == LOW) {  // systemstatus != kill_switch_status
     mode = 3;  // "armed (waiting)"
+    system_status = 0;
     if (millis() - previousMillis >= 200) {
       previousMillis = millis();
       sendCommand(pid_controller, "GET", "pid_controller");
@@ -597,6 +599,7 @@ void test_is_done(){
     command_angle_motor(0);
     kill_switch_status = LOW;
     count_display = 4;
+        system_status = 0;
 /*
       while (!receiveAcknowledgment(pid_controller, "ACK")) {
         send_setpoint(pid_controller, 0);
