@@ -71,10 +71,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
   attachInterrupt(digitalPinToInterrupt(ENDSTOP), readEndstop, FALLING);
 
-
-  // while (!main_controller) { delay(10); }
-  // while (!Serial) { delay(10); }
-  //delay(2000);
   find_endpoint();
 }
 
@@ -96,9 +92,9 @@ void loop() {
     send_angle_pwm(curr_angle);
   }
 
+//test code --->
   /*
   target = 0;
-
   while (abs(target - curr_angle) >= 0.5) {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= 25) {
@@ -276,10 +272,7 @@ void find_endpoint() {
   }
   if (endstop_pressed) {
     setMotor(0, 0, motor1, motor2);
-    //portENTER_CRITICAL(&mux);
-    //  posi = 4;  // Reset encoder position
-    //  portEXIT_CRITICAL(&mux);
-    //delay(2000);
+// happens in the interupt code
     endstop_pressed = false;
   }
 }
