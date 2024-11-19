@@ -12,9 +12,9 @@ The angle controller:
 
 The meassuring module:
 - meassures:
-  - voltage,
-  - ampere,
-  - wattage,
+  - voltage
+  - ampere
+  - wattage
   - mah_used
   - lift
   - drag
