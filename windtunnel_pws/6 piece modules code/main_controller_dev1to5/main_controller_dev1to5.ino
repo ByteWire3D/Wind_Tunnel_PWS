@@ -465,39 +465,6 @@ void setup() {
 }
 
 void loop() {
-  /*
-  if (millis() - previousMillis >= 200) {
-    loopDuration = millis() - previousMillis;
-    loopFrequency = 1000 / loopDuration;
-    previousMillis = millis();
-    sendCommand(pid_controller, "GET", "pid_controller");
-    waitForData(pid_controller, pid_data, 50, "pid_controller");  // to get an update on the systemstatus
-
-    sendCommand(meassuring_device, "GET", "measuring_device");
-    waitForData(meassuring_device, meassurment_data, 50, "meassuring_device");  // to flush the averages
-                                                                                /*
-    float angle = 23.34;
-    pitch = angle;
-    command_angle_motor(angle);
-
-    // 5hz -->
-    if (count_display >= 5) {
-      count_display = 0;
-      send_display_data();
-    }
-    count_display++;
-
-
-    send_datalogger();
-
-    Serial.print("loopfrequency :  ");
-    Serial.print(loopFrequency);
-    Serial.print("status :  ");
-    Serial.print(system_status);
-    Serial.println(" !");
-
-  }
-  */
   if (kill_switch_status == HIGH) { // systemstatus != kill_switch_status
     mode = 2;  //"testing active"
     system_status = 1;
@@ -554,8 +521,6 @@ void loop() {
               send_display_data();
             }
             count_display++;
-
-
             send_datalogger();
             executed = true;
           }
@@ -600,14 +565,6 @@ void test_is_done(){
     kill_switch_status = LOW;
     count_display = 4;
         system_status = 0;
-/*
-      while (!receiveAcknowledgment(pid_controller, "ACK")) {
-        send_setpoint(pid_controller, 0);
-        delay(50);
-        Serial.println("sending setpoint");
-    }
-    */
- 
 }
 void send_datalogger() {
   looptime = millis();
@@ -681,7 +638,7 @@ void send_setpoint(Stream &serial, int i) {
   } else if (i == 9) {
     command = "s:9";
   }
-  // Send the "GET" command
+  // Send the "...." command
   serial.write(command, strlen(command));
 }
 void send_display_data() {
