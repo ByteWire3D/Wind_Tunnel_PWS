@@ -394,7 +394,6 @@ void setup() {
   sd_card.begin(115200);
   pid_controller.begin(9600);
   meassuring_device.begin(9600);
-  //pid_angle_motor.begin(9600);
   display.begin(9600);
   unsigned long start_check = millis();
   // Handshake with each device
