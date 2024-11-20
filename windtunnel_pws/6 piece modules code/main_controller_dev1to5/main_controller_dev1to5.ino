@@ -212,7 +212,7 @@ float recieved_angle;
 bool executed = false;
 
 const int killswitch_pin_notpressed = 8;  // killswitch pin
-volatile bool kill_switch_status = LOW;      // System initially off
+volatile bool kill_switch_status = LOW;   // System initially off
 volatile unsigned long last_interrupt_time = 0;
 
 template<typename T>
@@ -332,7 +332,7 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
 */
       } else if (deviceName == "pid_controller") {
 
-       // system_status = pid_data.system_status;
+        // system_status = pid_data.system_status;
         setpoint = pid_data.setpoint;
         airspeed = pid_data.airspeed;
         error = pid_data.error;
@@ -408,9 +408,9 @@ void setup() {
   pinMode(killswitch_pin_notpressed, INPUT_PULLUP);
 
   attachInterrupt(digitalPinToInterrupt(killswitch_pin_notpressed), killswitch, RISING);
-  
+
   command_angle_motor(0);
-  
+
   if (!performHandshake(sd_card, 5000)) {
     Serial.println("sd_card communication failed.");
   }
@@ -464,24 +464,26 @@ void setup() {
 }
 
 void loop() {
-  if (kill_switch_status == HIGH) { // systemstatus != kill_switch_status
-    mode = 2;  //"testing active"
+  if (kill_switch_status == HIGH) {  // systemstatus != kill_switch_status
+    mode = 2;                        //"testing active"
     system_status = 1;
     Serial.println("system on running the test --->");
     for (int i = 0; i < total_steps; i++) {
       setpoint = windspeedList[i];
-         if (kill_switch_status == LOW) {
-          break;
-        }
+      if (kill_switch_status == LOW) {
+        break;
+      }
 
-      while (!receiveAcknowledgment(pid_controller, "ACK")) {
-        send_setpoint(pid_controller, i);
-        delay(50);
-        Serial.println("sending setpoint");
-           if (kill_switch_status == LOW) {
-          break;
+      // while (!receiveAcknowledgment(pid_controller, "ACK")) {
+      send_setpoint(pid_controller, i);
+      /*
+       delay(500);
+       Serial.println("sending setpoint");
+        if (kill_switch_status == LOW) {
+         break;
         }
       }
+      */
       Serial.println(setpoint);
       recieved_angle = read_target_from_pwm();
       Serial.println(recieved_angle);
@@ -492,7 +494,7 @@ void loop() {
         Serial.print("recieved angle:");
         Serial.println(recieved_angle);
         delay(100);
-           if (kill_switch_status == LOW) {
+        if (kill_switch_status == LOW) {
           break;
         }
       }
@@ -527,11 +529,11 @@ void loop() {
       }
     }
     // test is done set all the values to 0 and off
-   test_is_done();    
+    test_is_done();
   }
 
   if (kill_switch_status == LOW) {  // systemstatus != kill_switch_status
-    mode = 3;  // "armed (waiting)"
+    mode = 3;                       // "armed (waiting)"
     system_status = 0;
     if (millis() - previousMillis >= 200) {
       previousMillis = millis();
@@ -553,17 +555,12 @@ void loop() {
   }
 }
 
-void test_is_done(){
-    pinMode(killswitch_pin_notpressed, OUTPUT);
-
-    digitalWrite(killswitch_pin_notpressed, HIGH);
-    delay(200);
-    digitalWrite(killswitch_pin_notpressed, LOW);
-    pinMode(killswitch_pin_notpressed, INPUT_PULLUP);
-    command_angle_motor(0);
-    kill_switch_status = LOW;
-    count_display = 4;
-        system_status = 0;
+void test_is_done() {
+  send_setpoint(pid_controller, -1);
+  command_angle_motor(0);
+  kill_switch_status = LOW;
+  count_display = 4;
+  system_status = 0;
 }
 void send_datalogger() {
   looptime = millis();
@@ -599,7 +596,7 @@ void send_measuring_device_conf_data() {
 void command_angle_motor(float angle) {
   angle *= 100;
   unsigned long pulsewidth = map(angle, 0, 4500, 500, 2500);
-  Serial.println(pulsewidth);
+  //Serial.println(pulsewidth);
   servo.writeMicroseconds(pulsewidth);
 }
 
@@ -616,7 +613,9 @@ float read_target_from_pwm() {
 }
 void send_setpoint(Stream &serial, int i) {
   const char *command;
-  if (i == 0) {
+  if (i == -1) {
+    command = "fff";
+  } else if (i == 0) {
     command = "s:0";
   } else if (i == 1) {
     command = "s:1";
@@ -719,6 +718,7 @@ bool receiveAcknowledgment(Stream &serial, const char *expectedAck) {
     serial.readBytes(ack, sizeof(ack) - 1);
     ack[3] = '\0';  // Null terminate the string
     return strcmp(ack, expectedAck) == 0;
+    Serial.println(ack);
   }
   return false;
 }
@@ -801,10 +801,11 @@ void killswitch() {
   if (interrupt_time - last_interrupt_time > 200) {
     // Toggle the system state
     kill_switch_status = !kill_switch_status;
-
+    Serial.print("killswitch pressed!!! new status: ");
+    Serial.println(kill_switch_status);
     // Motor control based on the new state
     if (kill_switch_status == LOW) {  // kill the motors
-// reset the test loop so: return to beginn
+                                      // reset the test loop so: return to beginn
     }
     if (kill_switch_status == HIGH) {
     }

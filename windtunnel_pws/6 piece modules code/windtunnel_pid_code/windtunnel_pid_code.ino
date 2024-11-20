@@ -132,13 +132,15 @@ HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 
 int set = 0;
 const int led_pin = 8;
-const int stop_pin = 9;
 
-bool stop = false;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
-  while (!main_controller) { delay(10); }
+  Serial.println("waiting for handshake or shmt");
+  while (!main_controller) {
+    delay(10);
+    Serial.println("waiting for main controller");
+  }
 
   Wire.begin();
 
@@ -152,14 +154,14 @@ void setup() {
   motor2.attach(motorPin2, 1000, 2000);
 
   delay(3000);
+  Serial.println("waiting for handshake or shmt");
   performHandshake(main_controller, 5000);
   handleSetCommand(main_controller, data_recv);
 
   pinMode(killswitch_pin_pressed, INPUT_PULLUP);
-   pinMode(stop_pin, INPUT);
   pinMode(led_pin, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(killswitch_pin_pressed), killswitch, FALLING);
-  attachInterrupt(digitalPinToInterrupt(stop_pin), stopswitch, RISING);
+
 
 
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
@@ -181,15 +183,14 @@ void setup() {
 }
 
 void loop() {
-  handleCommand(main_controller);
   unsigned long current_time = millis();
 
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
-   // status = 1;
+    // status = 1;
     setpoint = windspeedList[set];
     pid_controller_data data_send{
-     // status,
+      // status,
       setpoint,
       avrg_airspeed,
       error,
@@ -207,13 +208,13 @@ void loop() {
       Serial.println(setpoint);
       //Read raw pressure values from sensor
 
-      // airspeed = calc_airspeed_moving_filter();
-      // Serial.print(airspeed);
+       //airspeed = calc_airspeed_moving_filter();
+       //Serial.print(airspeed);
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
-      //  airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-      airspeed_filtered = 0;
+      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+     // airspeed_filtered = 0;
       avrg_count++;
       avrg_airspeed += airspeed_filtered;
 
@@ -243,7 +244,7 @@ void loop() {
 
     avrg_airspeed / avrg_count;
 
-   // status = 0;
+    // status = 0;
     pid_controller_data data_send{
       //status,
       setpoint,
@@ -449,8 +450,8 @@ void killswitch() {
     // Toggle the system state
     system_status = !system_status;
 
-
-
+    Serial.print("killswitch pressed!!! new status: ");
+    Serial.println(system_status);
 
     // Motor control based on the new state
     if (system_status == LOW) {  // kill the motors
@@ -476,36 +477,6 @@ void killswitch() {
   }
 }
 
-void stopswitch(){
-   unsigned long interrupt_time = millis();
-
-  // Debounce: Ignore interrupt if triggered within the last 200ms
-  if (interrupt_time - last_interrupt_time > 200) {
-    // Toggle the system state
-    system_status = LOW;
-
-    // Motor control based on the new state
-     // kill the motors
-      motor1.writeMicroseconds(minPulseWidth);
-      motor2.writeMicroseconds(minPulseWidth);
-      motor_signal1 = 1000;
-      motor_signal2 = 1000;
-      setpoint = 0;
-      integral = 0;
-      derivative = 0;
-      previousError = 0;
-      Pout = 0;
-      Iout = 0;
-      Dout = 0;
-      output = 1000;
-      baseline_motor_signal = 1000;
-      previous_output = 1000;
-
-    // Update the last interrupt time
-    last_interrupt_time = interrupt_time;
-  }
-
-}
 float better_contrain(float value, float range_low, float range_high) {
   float value_offset = 0;
   if (value <= range_low) {
@@ -905,7 +876,7 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       avrg_count = 0;
       avrg_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 50, 25);
-    }  else if (strcmp(command, "TGE") == 0) {
+    } else if (strcmp(command, "TGE") == 0) {
       Serial.println("TGE command received");
       avrg_count = 0;
       avrg_airspeed = 0;
@@ -915,9 +886,10 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       avrg_count = 0;
       avrg_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 50, 25);
-    }else if (strcmp(command, "s:0") == 0) {
+    } else if (strcmp(command, "s:0") == 0) {
       Serial.println("s:0 command received");
       sendAcknowledgment(main_controller, "ACK");
+
       set = 0;
     } else if (strcmp(command, "s:1") == 0) {
       Serial.println("s:1 command received");
@@ -955,8 +927,23 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       Serial.println("s:9 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 9;
-    } 
-     else {
+    } else if (strcmp(command, "fff") == 0) {
+      system_status = LOW;
+      motor1.writeMicroseconds(minPulseWidth);
+      motor2.writeMicroseconds(minPulseWidth);
+      motor_signal1 = 1000;
+      motor_signal2 = 1000;
+      //setpoint = 0;
+      integral = 0;
+      derivative = 0;
+      previousError = 0;
+      Pout = 0;
+      Iout = 0;
+      Dout = 0;
+      output = 1000;
+      baseline_motor_signal = 1000;
+      previous_output = 1000;
+    } else {
       Serial.print("other data recieved: ");
       Serial.println(command);
       clearSerialBuffer(serial);
@@ -974,7 +961,7 @@ void handleCommand(HardwareSerial &serial) {
       Serial.println("armed command received");
       main_controller_status = HIGH;
       sendAcknowledgment(main_controller, "ACK");
-    }  else {
+    } else {
       Serial.print("other data recieved: ");
       Serial.println(command);
       clearSerialBuffer(serial);
@@ -998,6 +985,7 @@ void handleSetCommand(HardwareSerial &serial, T &dataToRecieve) {
 }
 void sendAcknowledgment(Stream &serial, const char *ackMessage) {
   serial.write(ackMessage, strlen(ackMessage));
+  Serial.println("ack send back");
 }
 template<typename T>
 void sendDataWithRetry(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms, unsigned long retry_interval_ms) {
