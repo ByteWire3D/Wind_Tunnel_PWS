@@ -71,10 +71,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCA), readEncoder, RISING);
   attachInterrupt(digitalPinToInterrupt(ENDSTOP), readEndstop, FALLING);
 
-
-  // while (!main_controller) { delay(10); }
-  // while (!Serial) { delay(10); }
-  //delay(2000);
   find_endpoint();
 }
 
@@ -96,9 +92,9 @@ void loop() {
     send_angle_pwm(curr_angle);
   }
 
+//test code --->
   /*
   target = 0;
-
   while (abs(target - curr_angle) >= 0.5) {
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= 25) {
@@ -151,20 +147,7 @@ float read_target_from_pwm() {
   // Map the pulse width to the target angle
   float target = map(pulseWidth, 500, 2500, 0, 4500);
   target /= 100;
-  /*
-  float diff = target - prev_target;
-  if (diff < 10) {
-    if (target > prev_target) {
-      target = target;  // do nothing target is bigger that the prev target
-    } else {
-      target = prev_target;  // always chose the bigget angle
-    }
-
-  } else {
-    target = 
-    target;  // do nothing, let it change to the smaller angle if diff is bigg enough
-  }
-  */
+ 
   Serial.print("target recieved:");
   Serial.print(target);
   Serial.print("\t");
@@ -177,6 +160,7 @@ float read_target_from_pwm() {
 void send_angle_pwm(float actual_angle) {
   actual_angle *= 100;
   unsigned long pulsewidth = map(actual_angle, 0, 4500, 500, 2500);
+  Serial.print("send angle: ");
   Serial.print(actual_angle);
   Serial.print("\t");
   Serial.println(pulsewidth);
@@ -278,7 +262,7 @@ void find_endpoint() {
     setMotor(1, 200, motor1, motor2);
     Serial.println("direction: 1");
     delay(10);
-    if (millis() - prevMillis >= 5000) {
+    if (millis() - prevMillis >= 3000) {
       prevMillis = millis();
       Serial.println("move other way -->");
       Serial.println("direction: -1");
@@ -288,10 +272,7 @@ void find_endpoint() {
   }
   if (endstop_pressed) {
     setMotor(0, 0, motor1, motor2);
-    //portENTER_CRITICAL(&mux);
-    //  posi = 4;  // Reset encoder position
-    //  portEXIT_CRITICAL(&mux);
-    //delay(2000);
+// happens in the interupt code
     endstop_pressed = false;
   }
 }
