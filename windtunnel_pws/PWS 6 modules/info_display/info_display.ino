@@ -722,9 +722,7 @@ void convert_seconds(int seconds) {
   t = (t - s) / 60;
   int m = t % 60;
 
-  //Serial.print(s);
-  // Serial.print("\t");
-  // Serial.println(m);
+
   tft.setCursor(start_x_middel + calculate_Length("Time= ", 1), start_y + word_spacing * word_count + list_spacing * list_count);  // links boven in
   tft.setTextColor(ST77XX_SLPIN, ST77XX_BLACK);
   tft.setTextSize(1);

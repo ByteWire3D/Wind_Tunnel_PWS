@@ -82,16 +82,6 @@ float R = 5;      // Measurement noise (based on 0.2 m/s uncertainty)
 float K_k = 0.0;  // Kalman gain
 float z_k = 0.0;  // Measurement (airspeed)
 
-// || pid value's ||
-
-// PID constants
-/* example pid constats:
-float Kp = 1.0;
-float Ki = 0.05;
-float Kd = 0.01;
-*/
-//test constatnts:
-
 
 float baseline_motor_signal = 1000;  // Initial baseline motor signal (can start at minPulseWidth)
 float previous_output = 1000;
@@ -187,10 +177,9 @@ void loop() {
 
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
-    // status = 1;
+ 
     setpoint = windspeedList[set];
     pid_controller_data data_send{
-      // status,
       setpoint,
       avrg_airspeed,
       error,
@@ -214,13 +203,12 @@ void loop() {
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-     // airspeed_filtered = 0;
+
       avrg_count++;
       avrg_airspeed += airspeed_filtered;
 
       avrg_airspeed / avrg_count;
-      //Serial.print(airspeed_kalman);
-      // Serial.print(",");
+
       Serial.print(airspeed_filtered);
       Serial.println(",");
 
@@ -237,16 +225,14 @@ void loop() {
     setpoint = 0;
     set = 0;
     digitalWrite(led_pin, LOW);
-    //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    airspeed_filtered = 0;
+    airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
     avrg_airspeed / avrg_count;
 
-    // status = 0;
     pid_controller_data data_send{
-      //status,
       setpoint,
       avrg_airspeed,
       error,
@@ -331,35 +317,22 @@ float calc_airspeed_kalman_filter() {
   float correctedPressure = abs(rawPressure - zeroAirspeedPressure);
   //float correctedPressure = rawPressure;
 
-
   float airspeed = sqrt(2 * correctedPressure / rho);
-
 
   z_k = airspeed;  // Replace with your airspeed sensor reading function
 
-
   // Step 2: Prediction step
   P_k = P_k + Q;  // Predicted error covariance
-
 
   // Step 3: Update step
   // Compute Kalman gain
   K_k = P_k / (P_k + R);
 
-
   // Update estimate with measurement
   x_k = x_k + K_k * (z_k - x_k);
 
-
   // Update error covariance
   P_k = (1 - K_k) * P_k;
-
-
-  // Serial.print("Measured Airspeed: ");
-  // Serial.print(z_k);
-  //Serial.print(" | Filtered Airspeed: ");
-  //Serial.println(x_k);
-
 
   return x_k;
 }
@@ -368,18 +341,13 @@ float calc_airspeed_kalman_filter() {
 float filtered_airspeed() {
   airspeed = calc_airspeed_kalman_filter();
 
-
   airspeedBuffer[airspeedBufferIndex] = airspeed;
   airspeedBufferIndex = (airspeedBufferIndex + 1) % airspeedBufferSize;
-
 
   float sumAirspeed = 0.0;
   for (int i = 0; i < airspeedBufferSize; i++) {
     sumAirspeed += airspeedBuffer[i];
-    //Serial.print(pressureBuffer[i]);
-    //Serial.print("\n");
   }
-
 
   float average_airspeed = sumAirspeed / airspeedBufferSize;
   float corrected_airspeed = average_airspeed / correction_value;
@@ -414,24 +382,15 @@ void calibrate() {
       delay(50);  // Small delay between readings
     }
 
-
-
-
     zeroAirspeedPressure = sumPressure / numReadings;
     Serial.print("Zero airspeed pressure: ");
     Serial.println(zeroAirspeedPressure);
-
-
-
 
     // Perform slope calibration
     slope = 1.0;  // Example slope factor (replace with actual value)
     Serial.print("Slope calibration factor: ");
     Serial.println(slope);
     delay(1000);
-
-
-
 
     for (int i = 0; i < bufferSize; i++) {
       pressureBuffer[i] = zeroAirspeedPressure;
@@ -441,9 +400,6 @@ void calibrate() {
 }
 void killswitch() {
   unsigned long interrupt_time = millis();
-
-
-
 
   // Debounce: Ignore interrupt if triggered within the last 200ms
   if (interrupt_time - last_interrupt_time > 200) {
@@ -505,21 +461,16 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   //Proportional term
   Pout = Kp * error;
 
-
   // Integral term
   integral += (error * (interval / 1000));  // Assuming a loop time of 50ms
   Iout = Ki * integral;
-
 
   // Derivative term
   derivative = (error - previousError) / (interval / 1000);  // Assuming a loop time of 50ms
   Dout = Kd * derivative;
 
-
   // Calculate total output using the last baseline as the starting point
   // output = baseline_motor_signal + Pout + Iout + Dout;
-
-
   pid_output = baseline_motor_signal + Pout + Iout + Dout;
 
 
@@ -528,7 +479,6 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   if (abs(delta) > maxDelta) {
     delta = (delta > 0) ? maxDelta : -maxDelta;  // Limit the delta to maxDelta
   }
-
 
   // Update the output with the limited change
   output = previous_output + delta;
@@ -544,7 +494,6 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   } else {
     // Outside the deadband, continue normal PID adjustments
     is_in_deadband = false;
-
 
     // Gradually adjust the baseline towards the current output
     baseline_motor_signal += baseline_adjust_rate * (output - baseline_motor_signal);
@@ -562,13 +511,10 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   previousError = error;
   previous_output = output;
 
-
   // Serial.print(setpoint);
   // Serial.print(",");
 
-
   // Serial.println(airspeed);
-
 
   // Debugging info
   Serial.print("setpoint: ");
@@ -608,27 +554,16 @@ void airspeed_pid(float airspeed, float setpoint) {
     // Proportional term
     Pout = Kp * error;
 
-
     // Integral term
     integral += (error * (interval / 1000));  // Assuming a loop time of 50ms
     Iout = Ki * integral;
-
-
-
 
     // Derivative term
     derivative = (error - previousError) / (interval / 1000);  // Assuming a loop time of 50ms
     Dout = Kd * derivative;
 
-
-    //aprox_motor_signal = 1000 + setpoint * airspeed_to_motor_signal;
-
-
-
-
     // Calculate total output
     output = aprox_motor_signal + Pout + Iout + Dout;
-
 
     if (abs(error) < deadband) {
       if (!is_in_deadband) {
@@ -646,7 +581,6 @@ void airspeed_pid(float airspeed, float setpoint) {
       // Gradually adjust the baseline towards the current output
       //baseline_motor_signal += baseline_adjust_rate * (output - baseline_motor_signal);
     }
-
 
     output_offset = better_contrain(output, minPulseWidth, 1300);
     output -= output_offset;
@@ -680,9 +614,6 @@ void airspeed_pid(float airspeed, float setpoint) {
     output = aprox_motor_signal;
   }
 
-
-
-
   //command motors:
   command_motors(output);
 }
@@ -700,16 +631,6 @@ void command_motors(float output) {
 
 void setPIDValues() {
 
-
-  /*
-  Serial.print("Enter new aprox_motor_signal value: ");
-  while (!Serial.available())
-    ;                                        // Wait for user input
-  aprox_motor_signal = Serial.parseFloat();  // Read float value from the serial monitor
-  Serial.println(aprox_motor_signal);
-  clearSerialBuffer();  // Clear any leftover characters
-  delay(200);
-*/
   Serial.print("Enter new P value: ");
   while (!Serial.available())
     ;                        // Wait for user input
@@ -717,9 +638,6 @@ void setPIDValues() {
   Serial.println(Kp);
   clearSerialBuffer(Serial);  // Clear any leftover characters
   delay(200);
-
-
-
 
   Serial.print("Enter new I value: ");
   while (!Serial.available())
@@ -729,9 +647,6 @@ void setPIDValues() {
   clearSerialBuffer(Serial);
   delay(200);
 
-
-
-
   Serial.print("Enter new D value: ");
   while (!Serial.available())
     ;
@@ -739,9 +654,6 @@ void setPIDValues() {
   Serial.println(Kd);
   clearSerialBuffer(Serial);
   delay(200);
-
-
-
 
   Serial.println("PID values updated.");
 }
