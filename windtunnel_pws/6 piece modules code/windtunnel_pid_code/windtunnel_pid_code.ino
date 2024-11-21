@@ -237,8 +237,8 @@ void loop() {
     setpoint = 0;
     set = 0;
     digitalWrite(led_pin, LOW);
-    //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    airspeed_filtered = 0;
+    airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+   // airspeed_filtered = 0;
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
