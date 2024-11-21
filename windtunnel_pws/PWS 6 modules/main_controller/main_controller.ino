@@ -223,7 +223,6 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
     if (receiveData(serial, data)) {
       sendAcknowledgment(serial, "ACK");
       if (deviceName == "sd_card") {
-
         calibrationValue_Lift = sd_data.calibrationValue_Lift;
         calibrationValue_Drag = sd_data.calibrationValue_Drag;
         calibrationValue_Ampere = sd_data.calibrationValue_Ampere;
@@ -464,7 +463,7 @@ void loop() {
       if (kill_switch_status == LOW) {
         break;
       }
-
+      
       send_setpoint(pid_controller, i);
 
       Serial.println(setpoint);
@@ -481,6 +480,28 @@ void loop() {
           break;
         }
       }
+     prev_millis = milllis();
+      while(millis() - prev_millis <= 5000){
+        if(millis() - previousMillis >= 200){
+           previousMillis = millis();
+           sendCommand(pid_controller, "GET", "pid_controller");
+           waitForData(pid_controller, pid_data, 90, "pid_controller");
+           if (kill_switch_status == LOW) {
+              break;
+            }
+            sendCommand(meassuring_device, "GET", "measuring_device");
+            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
+            command_angle_motor(0);
+            pitch = read_target_from_pwm();
+            if (count_display >= 4) {
+              count_display = 0;
+              send_display_data();
+            }
+            count_display++;
+            send_datalogger();
+        }
+      }
+
       for (float j = start_angle; j <= end_angle; j += 0.2) {
         if (kill_switch_status == LOW) {
           break;
