@@ -480,7 +480,7 @@ void loop() {
           break;
         }
       }
-     prev_millis = milllis();
+     prev_millis = millis();
      while(millis() - prev_millis <= 7500){
         if (kill_switch_status == LOW) {
               break;
