@@ -116,7 +116,6 @@ float loopFrequency;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(115200);
-  // while(!Serial){delay(10);}
   while (!main_controller) { delay(10); }
   delay(1000);
   if (!performHandshake(main_controller, 5000)) {
@@ -136,8 +135,7 @@ void setup() {
   String filePath = findTextFile("/configuration/test format");
 
   if (filePath != "") {
-    //Serial.print("Found file: ");
-    //Serial.println(filePath);
+
     readTestformat(filePath.c_str());
   } else {
     //Serial.println("No .txt file found in the directory");
@@ -171,7 +169,7 @@ void loop() {
 void setup_sdcard() {
   SPI.begin(SCK, MISO, MOSI, CS);
   while (!SD.begin(CS, SPI, 80000000)) {
-    //Serial.println("Card Mount Failed");
+
     delay(100);
   }
 
@@ -360,9 +358,9 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
 
 // Create a directory
 void createDir(fs::FS &fs, const char *path) {
-  //serial.printf("Creating Dir: %s\n", path);
+
   if (fs.mkdir(path)) {
-    //serial.println("Dir created");
+   
   } else {
     //serial.println("mkdir failed");
   }
@@ -563,71 +561,6 @@ String findTextFile(const char *dirPath) {
   return "";  // Return empty if no .txt file is found
 }
 template<typename T>
-/*
-void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
-    unsigned long start_time = millis();
-
-    while ((millis() - start_time) < max_wait_time_ms) {
-        if (receiveData(serial, data)) {
-            sendAcknowledgment(serial, "ACK");
-
-            if (strcmp(deviceName, "main_controller") == 0) {
-                Serial.print("Data received from: ");
-                Serial.println(deviceName);
-
-                // Define buffers for each data field that needs conversion
-                char loopNumberBuffer[20];
-                char setpointBuffer[20];
-                char airspeedBuffer[20];
-                char errorBuffer[20];
-                char outputBuffer[20];
-                char liftLoadcellBuffer[20];
-                char dragLoadcellBuffer[20];
-                char ampereBuffer[20];
-                char voltageBuffer[20];
-                char wattageBuffer[20];
-                char mahUsedBuffer[20];
-                char looptimeBuffer[20];
-
-                // Convert the values to char arrays
-                dtostrf(data.loop_number, 6, 2, loopNumberBuffer);
-                dtostrf(data.setpoint, 6, 2, setpointBuffer);
-                dtostrf(data.airspeed, 6, 2, airspeedBuffer);
-                dtostrf(data.error, 6, 2, errorBuffer);
-                dtostrf(data.output, 6, 2, outputBuffer);
-                dtostrf(data.lift_loadcell, 6, 2, liftLoadcellBuffer);
-                dtostrf(data.drag_loadcell, 6, 2, dragLoadcellBuffer);
-                dtostrf(data.ampere, 6, 2, ampereBuffer);
-                dtostrf(data.voltage, 6, 2, voltageBuffer);
-                dtostrf(data.wattage, 6, 2, wattageBuffer);
-                dtostrf(data.mah_used, 6, 2, mahUsedBuffer);
-                dtostrf(data.looptime, 6, 2, looptimeBuffer);
-
-                // Append converted data to files
-                appendFile(SD, (testFolderName + "/loop_number.txt").c_str(), loopNumberBuffer);
-                appendFile(SD, (testFolderName + "/setpoint.txt").c_str(), setpointBuffer);
-                appendFile(SD, (testFolderName + "/airspeed.txt").c_str(), airspeedBuffer);
-                appendFile(SD, (testFolderName + "/error.txt").c_str(), errorBuffer);
-                appendFile(SD, (testFolderName + "/output_signal.txt").c_str(), outputBuffer);
-                appendFile(SD, (testFolderName + "/lift.txt").c_str(), liftLoadcellBuffer);
-                appendFile(SD, (testFolderName + "/drag.txt").c_str(), dragLoadcellBuffer);
-                appendFile(SD, (testFolderName + "/ampere.txt").c_str(), ampereBuffer);
-                appendFile(SD, (testFolderName + "/voltage.txt").c_str(), voltageBuffer);
-                appendFile(SD, (testFolderName + "/wattage.txt").c_str(), wattageBuffer);
-                appendFile(SD, (testFolderName + "/mah_used.txt").c_str(), mahUsedBuffer);
-                appendFile(SD, (testFolderName + "/timestamp.txt").c_str(), looptimeBuffer);
-            }
-
-            return;
-        }
-    }
-
-    Serial.print("Failed to receive data from ");
-    Serial.print(deviceName);
-    Serial.println(" within the time limit.");
-}
-*/
-
 void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
 
