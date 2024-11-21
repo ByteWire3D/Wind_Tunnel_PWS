@@ -223,7 +223,6 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
     if (receiveData(serial, data)) {
       sendAcknowledgment(serial, "ACK");
       if (deviceName == "sd_card") {
-
         calibrationValue_Lift = sd_data.calibrationValue_Lift;
         calibrationValue_Drag = sd_data.calibrationValue_Drag;
         calibrationValue_Ampere = sd_data.calibrationValue_Ampere;
@@ -426,7 +425,7 @@ void setup() {
   Serial.println(millis() - start_check);
 
   start_check = millis();
-  // pid_controller.listen(); // Switch to pid_controller before communication
+
   if (!performHandshake(pid_controller, 5000)) {
     Serial.println("pid_controller communication failed.");
   }
@@ -438,20 +437,11 @@ void setup() {
   sendCommand(sd_card, "GET", "sd_card");
   waitForData(sd_card, sd_data, 2000, "sd_card");
 
-  Serial.println("cal_lift: ");
-  Serial.println(calibrationValue_Lift);
-  Serial.println("cal_drag: ");
-  Serial.println(calibrationValue_Drag);
-  Serial.println("cal_amper: ");
-  Serial.println(calibrationValue_Ampere);
-
   sendCommand(meassuring_device, "SET", "meassuring device");
   send_measuring_device_conf_data();
 
   sendCommand(pid_controller, "SET", "pid_controller");
-  // send(setpoint)  // add the send setpoint function that sends a number or a wordt so the pid contorller can change it,
-  // also add the mode as: testing and not testing, and sending conf etc
-  // add the setpoint list in the conf
+
   send_pid_controller_conf_data();
   Serial.println("All handshakes complete. Waiting for data...");
   while (!receiveAcknowledgment(pid_controller, "ACK")) {
@@ -473,17 +463,9 @@ void loop() {
       if (kill_switch_status == LOW) {
         break;
       }
-
-      // while (!receiveAcknowledgment(pid_controller, "ACK")) {
+      
       send_setpoint(pid_controller, i);
-      /*
-       delay(500);
-       Serial.println("sending setpoint");
-        if (kill_switch_status == LOW) {
-         break;
-        }
-      }
-      */
+
       Serial.println(setpoint);
       recieved_angle = read_target_from_pwm();
       Serial.println(recieved_angle);
@@ -498,6 +480,31 @@ void loop() {
           break;
         }
       }
+     prev_millis = millis();
+     while(millis() - prev_millis <= 7500){
+        if (kill_switch_status == LOW) {
+              break;
+            }
+        if(millis() - previousMillis >= 200){
+           previousMillis = millis();
+           sendCommand(pid_controller, "GET", "pid_controller");
+           waitForData(pid_controller, pid_data, 90, "pid_controller");
+           if (kill_switch_status == LOW) {
+              break;
+            }
+            sendCommand(meassuring_device, "GET", "measuring_device");
+            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
+            command_angle_motor(0);
+            pitch = read_target_from_pwm();
+            if (count_display >= 4) {
+              count_display = 0;
+              send_display_data();
+            }
+            count_display++;
+            send_datalogger();
+        }
+      }
+
       for (float j = start_angle; j <= end_angle; j += 0.2) {
         if (kill_switch_status == LOW) {
           break;
@@ -605,8 +612,7 @@ float read_target_from_pwm() {
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
   Serial.print(pulseWidth);
   Serial.print("\t");
-  //pulseWidth = constrain(pulseWidth, 1000, 2000);
-  // Map the pulse width to the target angle
+
   float angle = map(pulseWidth, 100, 500, 0, 4500);
   angle /= 100;
   return angle;
