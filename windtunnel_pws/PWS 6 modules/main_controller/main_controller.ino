@@ -482,6 +482,9 @@ void loop() {
       }
      prev_millis = milllis();
      while(millis() - prev_millis <= 7500){
+        if (kill_switch_status == LOW) {
+              break;
+            }
         if(millis() - previousMillis >= 200){
            previousMillis = millis();
            sendCommand(pid_controller, "GET", "pid_controller");
