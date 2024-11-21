@@ -463,7 +463,7 @@ void loop() {
       if (kill_switch_status == LOW) {
         break;
       }
-      
+
       send_setpoint(pid_controller, i);
 
       Serial.println(setpoint);
@@ -480,28 +480,28 @@ void loop() {
           break;
         }
       }
-     prev_millis = millis();
-     while(millis() - prev_millis <= 7500){
+      prev_millis = millis();
+      while (millis() - prev_millis <= 7500) {
         if (kill_switch_status == LOW) {
-              break;
-            }
-        if(millis() - previousMillis >= 200){
-           previousMillis = millis();
-           sendCommand(pid_controller, "GET", "pid_controller");
-           waitForData(pid_controller, pid_data, 90, "pid_controller");
-           if (kill_switch_status == LOW) {
-              break;
-            }
-            sendCommand(meassuring_device, "GET", "measuring_device");
-            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
-            command_angle_motor(0);
-            pitch = read_target_from_pwm();
-            if (count_display >= 4) {
-              count_display = 0;
-              send_display_data();
-            }
-            count_display++;
-            send_datalogger();
+          break; // add a way out of the wait loop
+        }
+        if (millis() - previousMillis >= 200) {
+          previousMillis = millis();
+          sendCommand(pid_controller, "GET", "pid_controller");
+          waitForData(pid_controller, pid_data, 90, "pid_controller");
+          if (kill_switch_status == LOW) {
+            break;
+          }
+          sendCommand(meassuring_device, "GET", "measuring_device");
+          waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
+          command_angle_motor(0);
+          pitch = read_target_from_pwm();
+          if (count_display >= 4) {
+            count_display = 0;
+            send_display_data();
+          }
+          count_display++;
+          send_datalogger();
         }
       }
 
