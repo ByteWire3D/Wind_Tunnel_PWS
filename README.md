@@ -8,7 +8,7 @@ The main controller:
 
 The angle controller:
 - a PID controlled n20 brushed encode motor
-- cable of 1/7 deg acuraty
+- cable of 1/5 deg acuraty
 
 The meassuring module:
 - meassures:
