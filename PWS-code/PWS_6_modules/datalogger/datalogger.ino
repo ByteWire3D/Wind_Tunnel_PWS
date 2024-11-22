@@ -41,7 +41,6 @@ struct Conf_Data {
 };
 
 struct TestData {
-  bool log_data;
   float setpoint;
   float airspeed;
   float error;

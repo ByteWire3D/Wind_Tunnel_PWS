@@ -106,7 +106,6 @@ struct config_pid_controller {
 };
 
 struct SDcard_log_data {
-  bool log_data;
   float setpoint;
   float airspeed;
   float error;
@@ -577,13 +576,16 @@ void send_datalogger() {
     airspeed,
     error,
     output,
+
     lift_loadcell,
     drag_loadcell,
     pitch,
+
     ampere,
     voltage,
     wattage,
     mah_used,
+    
     looptime,
     loop_number
   };
