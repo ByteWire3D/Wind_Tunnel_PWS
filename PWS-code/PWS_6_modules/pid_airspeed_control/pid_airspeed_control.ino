@@ -156,7 +156,7 @@ void setup() {
 
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
   // Calibrate the sensor
-  // calibrate();
+  calibrate(); // clibrate airspeed ---> no zeroaisoeed value saved!!!!
   while (system_status == HIGH) {
     delay(100);
     digitalWrite(led_pin, HIGH);
@@ -226,11 +226,7 @@ void loop() {
     set = 0;
     digitalWrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-<<<<<<< HEAD:windtunnel_pws/6 piece modules code/windtunnel_pid_code/windtunnel_pid_code.ino
-   // airspeed_filtered = 0;
-=======
-
->>>>>>> 9e2c4523bc4ce0b5742f372803d8753c52fbc906:Code-PWS/PWS 6 modules/pid_airspeed_control/pid_airspeed_control.ino
+    
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
