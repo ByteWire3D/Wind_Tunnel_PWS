@@ -684,7 +684,7 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
         Serial.print("data recieved from:");
         Serial.println(deviceName);
 
-        correction_value = data.calibrationValue_Airspeed;
+      //  correction_value = data.calibrationValue_Airspeed;
         pid_loop_hz = data.pid_loop_hz;
 
         maxDelta = data.delta_max;
