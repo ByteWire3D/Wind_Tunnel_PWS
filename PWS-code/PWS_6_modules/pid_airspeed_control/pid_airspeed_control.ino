@@ -195,6 +195,7 @@ void loop() {
       previous_time = millis();
       Serial.println("system is on!-->>>>>");
       Serial.println(setpoint);
+
       //Read raw pressure values from sensor
 
        //airspeed = calc_airspeed_moving_filter();
@@ -202,6 +203,7 @@ void loop() {
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
+
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
 
       avrg_count++;
@@ -213,7 +215,6 @@ void loop() {
       Serial.println(",");
 
       //command_motors(1200);
-      //airspeed_pid(airspeed, setpoint); // only pid algoritm
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
     }
   }
@@ -278,7 +279,7 @@ void loop() {
 void hz_inteval(int loop_freqenty) {
   interval = 1000 / loop_freqenty;
 }
-//float calc_unfiltered_airspeed()
+
 float calc_airspeed_moving_filter() {
   int16_t rawPressure = readRawPressure();
 
