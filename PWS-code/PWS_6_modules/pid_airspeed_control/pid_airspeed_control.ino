@@ -156,7 +156,11 @@ void setup() {
 
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
   // Calibrate the sensor
+<<<<<<< HEAD
   calibrate();
+=======
+  calibrate(); // clibrate airspeed ---> no zeroaisoeed value saved!!!!
+>>>>>>> a28cd24ba850ad07bb309bbec1e1a51af9c8fa81
   while (system_status == HIGH) {
     delay(100);
     digitalWrite(led_pin, HIGH);
@@ -195,6 +199,7 @@ void loop() {
       previous_time = millis();
       Serial.println("system is on!-->>>>>");
       Serial.println(setpoint);
+
       //Read raw pressure values from sensor
 
        //airspeed = calc_airspeed_moving_filter();
@@ -202,6 +207,7 @@ void loop() {
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
+
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
 
       avrg_count++;
@@ -213,7 +219,6 @@ void loop() {
       Serial.println(",");
 
       //command_motors(1200);
-      //airspeed_pid(airspeed, setpoint); // only pid algoritm
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
     }
   }
@@ -226,7 +231,11 @@ void loop() {
     set = 0;
     digitalWrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a28cd24ba850ad07bb309bbec1e1a51af9c8fa81
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
@@ -278,7 +287,7 @@ void loop() {
 void hz_inteval(int loop_freqenty) {
   interval = 1000 / loop_freqenty;
 }
-//float calc_unfiltered_airspeed()
+
 float calc_airspeed_moving_filter() {
   int16_t rawPressure = readRawPressure();
 
@@ -683,7 +692,7 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
         Serial.print("data recieved from:");
         Serial.println(deviceName);
 
-        correction_value = data.calibrationValue_Airspeed;
+      //  correction_value = data.calibrationValue_Airspeed;
         pid_loop_hz = data.pid_loop_hz;
 
         maxDelta = data.delta_max;
