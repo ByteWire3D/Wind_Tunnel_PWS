@@ -510,15 +510,15 @@ void loop() {
         }
         Serial.print("angle:");
         Serial.println(j);
-        executed = false;
+       // executed = false;
         previousMillis = millis();
-        while (millis() - previousMillis <= 200) {
-          if (executed == false) {
-            sendCommand(pid_controller, "GET", "pid_controller");
+    
+            /// if (executed == false) {
+           
+          //  executed = true;
+           sendCommand(pid_controller, "GET", "pid_controller");
             waitForData(pid_controller, pid_data, 90, "pid_controller");
-            if (kill_switch_status == LOW) {
-              break;
-            }
+          
             sendCommand(meassuring_device, "GET", "measuring_device");
             waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
             command_angle_motor(j);
@@ -529,11 +529,14 @@ void loop() {
             }
             count_display++;
             send_datalogger();
-            executed = true;
+
+                while (millis() - previousMillis <= 200) {
+            if (kill_switch_status == LOW) {
+              break;
+            }
           }
         }
       }
-    }
     // test is done set all the values to 0 and off
     test_is_done();
   }
