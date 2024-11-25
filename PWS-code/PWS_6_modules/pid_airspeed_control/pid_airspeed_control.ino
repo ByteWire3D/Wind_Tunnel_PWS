@@ -105,6 +105,7 @@ float output_offset;
 float output;
 
 float airspeed_filtered;
+
 float deadband = 0.001;
 
 
@@ -117,6 +118,7 @@ float windspeedList[10];
 
 volatile int avrg_count = 0;
 float avrg_airspeed;
+float gm_airspeed;
 bool main_controller_status = false;
 HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 
@@ -156,11 +158,8 @@ void setup() {
 
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
   // Calibrate the sensor
-<<<<<<< HEAD
-  calibrate();
-=======
-  calibrate(); // clibrate airspeed ---> no zeroaisoeed value saved!!!!
->>>>>>> a28cd24ba850ad07bb309bbec1e1a51af9c8fa81
+    //calibrate();  // clibrate airspeed ---> no zeroaisoeed value saved!!!!
+
   while (system_status == HIGH) {
     delay(100);
     digitalWrite(led_pin, HIGH);
@@ -181,11 +180,11 @@ void loop() {
 
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
- 
+
     setpoint = windspeedList[set];
     pid_controller_data data_send{
       setpoint,
-      avrg_airspeed,
+      gm_airspeed,
       error,
       output,
       baseline_motor_signal,
@@ -202,18 +201,18 @@ void loop() {
 
       //Read raw pressure values from sensor
 
-       //airspeed = calc_airspeed_moving_filter();
-       //Serial.print(airspeed);
+      //airspeed = calc_airspeed_moving_filter();
+      //Serial.print(airspeed);
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
 
-      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-
+      //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+      airspeed_filtered = 17.91;
       avrg_count++;
       avrg_airspeed += airspeed_filtered;
 
-      avrg_airspeed / avrg_count;
+      gm_airspeed = avrg_airspeed / avrg_count;
 
       Serial.print(airspeed_filtered);
       Serial.println(",");
@@ -230,20 +229,16 @@ void loop() {
     setpoint = 0;
     set = 0;
     digitalWrite(led_pin, LOW);
-    airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> a28cd24ba850ad07bb309bbec1e1a51af9c8fa81
+    // airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+    airspeed_filtered = 12.19;
     avrg_count++;
     avrg_airspeed += airspeed_filtered;
 
-    avrg_airspeed / avrg_count;
+    gm_airspeed = avrg_airspeed / avrg_count;
 
     pid_controller_data data_send{
       setpoint,
-      avrg_airspeed,
+      gm_airspeed,
       error,
       output,
       baseline_motor_signal,
@@ -692,7 +687,7 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
         Serial.print("data recieved from:");
         Serial.println(deviceName);
 
-      //  correction_value = data.calibrationValue_Airspeed;
+        //  correction_value = data.calibrationValue_Airspeed;
         pid_loop_hz = data.pid_loop_hz;
 
         maxDelta = data.delta_max;
@@ -796,16 +791,19 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       Serial.println("GET command received");
       avrg_count = 0;
       avrg_airspeed = 0;
+      gm_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 50, 25);
     } else if (strcmp(command, "TGE") == 0) {
       Serial.println("TGE command received");
       avrg_count = 0;
       avrg_airspeed = 0;
+        gm_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 50, 25);
     } else if (strcmp(command, "ETG") == 0) {
       Serial.println("ETG command received");
       avrg_count = 0;
       avrg_airspeed = 0;
+        gm_airspeed = 0;
       sendDataWithRetry(main_controller, datatosend, 50, 25);
     } else if (strcmp(command, "s:0") == 0) {
       Serial.println("s:0 command received");
