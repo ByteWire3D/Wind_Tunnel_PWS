@@ -214,6 +214,14 @@ const int killswitch_pin_notpressed = 8;  // killswitch pin
 volatile bool kill_switch_status = LOW;   // System initially off
 volatile unsigned long last_interrupt_time = 0;
 
+unsigned long prevMillisTest = 0;
+unsigned long prevMillisUpdate = 0;
+unsigned long prevMillisDisplay = 0;
+
+const unsigned long updateInterval = 200; // 200 ms update interval
+const unsigned long pid_wait_Duration = 7500; // 7500 ms per test step
+
+
 template<typename T>
 void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
@@ -453,115 +461,136 @@ void setup() {
 }
 
 void loop() {
-  if (kill_switch_status == HIGH) {  // systemstatus != kill_switch_status
-    mode = 2;                        //"testing active"
+// Add necessary state variables
+
+if (kill_switch_status == HIGH) { // Test active
+    mode = 2; // "testing active"
     system_status = 1;
-    Serial.println("system on running the test --->");
+    Serial.println("System on, running the test --->");
+
     for (int i = 0; i < total_steps; i++) {
-      setpoint = windspeedList[i];
-      if (kill_switch_status == LOW) {
-        break;
-      }
+        setpoint = windspeedList[i];
+        if (kill_switch_status == LOW) break;
 
-      send_setpoint(pid_controller, i);
+        send_setpoint(pid_controller, i);
 
-      Serial.println(setpoint);
-      recieved_angle = read_target_from_pwm();
-      Serial.println(recieved_angle);
-
-      while (abs(start_angle - recieved_angle) > 0.5) {
-        command_angle_motor(0);
+        Serial.println(setpoint);
         recieved_angle = read_target_from_pwm();
-        Serial.print("recieved angle:");
         Serial.println(recieved_angle);
-        delay(100);
-        if (kill_switch_status == LOW) {
-          break;
-        }
-      }
-      prev_millis = millis();
-      while (millis() - prev_millis <= 7500) {
-        if (kill_switch_status == LOW) {
-          break; // add a way out of the wait loop
-        }
-        if (millis() - previousMillis >= 200) {
-          previousMillis = millis();
-          sendCommand(pid_controller, "GET", "pid_controller");
-          waitForData(pid_controller, pid_data, 90, "pid_controller");
-          if (kill_switch_status == LOW) {
-            break;
-          }
-          sendCommand(meassuring_device, "GET", "measuring_device");
-          waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
-          command_angle_motor(0);
-          pitch = read_target_from_pwm();
-          if (count_display >= 4) {
-            count_display = 0;
-            send_display_data();
-          }
-          count_display++;
-          send_datalogger();
-        }
-      }
 
-      for (float j = start_angle; j <= end_angle; j += 0.2) {
-        if (kill_switch_status == LOW) {
-          break;
+        // Adjust motor until the angle is within tolerance
+        while (abs(start_angle - recieved_angle) > 0.5) {
+            command_angle_motor(0);
+            recieved_angle = read_target_from_pwm();
+            Serial.print("Received angle:");
+            Serial.println(recieved_angle);
+            if (millis() - prevMillisUpdate >= updateInterval) {
+                prevMillisUpdate = millis();
+                // Allow for other operations during angle adjustment
+                if (kill_switch_status == LOW) break;
+            }
         }
-        Serial.print("angle:");
-        Serial.println(j);
-       // executed = false;
-        previousMillis = millis();
-    
-            /// if (executed == false) {
-           
-          //  executed = true;
-           sendCommand(pid_controller, "GET", "pid_controller");
+
+        prevMillisTest = millis();
+        while (millis() - prevMillisTest <= pid_wait_Duration) {
+            if (kill_switch_status == LOW) break;
+
+            if (millis() - prevMillisUpdate >= updateInterval) {
+                prevMillisUpdate = millis();
+
+                // Send and receive PID data
+                sendCommand(pid_controller, "GET", "pid_controller");
+                waitForData(pid_controller, pid_data, 90, "pid_controller");
+                if (kill_switch_status == LOW) break;
+
+                // Send and receive measuring device data
+                sendCommand(meassuring_device, "GET", "measuring_device");
+                waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
+
+                command_angle_motor(0);
+                pitch = read_target_from_pwm();
+
+                // Update display data every 4 cycles
+                if (count_display >= 4) {
+                    count_display = 0;
+                    send_display_data();
+                }
+                count_display++;
+
+                // Log data
+                send_datalogger();
+            }
+        }
+
+        // Perform angle sweep
+        static float currentAngle = start_angle;
+        while (currentAngle <= end_angle) {
+            if (kill_switch_status == LOW) break;
+
+            Serial.print("Angle:");
+            Serial.println(currentAngle);
+
+            // Perform step actions
+            sendCommand(pid_controller, "GET", "pid_controller");
             waitForData(pid_controller, pid_data, 90, "pid_controller");
-          
+
             sendCommand(meassuring_device, "GET", "measuring_device");
-            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
-            command_angle_motor(j);
+            waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
+
+            command_angle_motor(currentAngle);
             pitch = read_target_from_pwm();
+
+            // Update display data every 4 cycles
             if (count_display >= 4) {
-              count_display = 0;
-              send_display_data();
+                count_display = 0;
+                send_display_data();
             }
             count_display++;
+
+            // Log data
             send_datalogger();
 
-                while (millis() - previousMillis <= 200) {
-            if (kill_switch_status == LOW) {
-              break;
+            // Wait for the next step
+            if (millis() - prevMillisUpdate >= updateInterval) {
+                prevMillisUpdate = millis();
+                currentAngle += 0.2; // Increment angle after delay
             }
-          }
         }
-      }
-    // test is done set all the values to 0 and off
-    test_is_done();
-  }
 
-  if (kill_switch_status == LOW) {  // systemstatus != kill_switch_status
-    mode = 3;                       // "armed (waiting)"
-    system_status = 0;
-    if (millis() - previousMillis >= 200) {
-      previousMillis = millis();
-      sendCommand(pid_controller, "GET", "pid_controller");
-      waitForData(pid_controller, pid_data, 100, "pid_controller");
-
-      sendCommand(meassuring_device, "GET", "measuring_device");
-      waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
-
-      command_angle_motor(0);
-
-      if (count_display >= 4) {
-        count_display = 0;
-        send_display_data();
-        Serial.println("system off");
-      }
-      count_display++;
+        currentAngle = start_angle; // Reset angle for the next step
     }
-  }
+
+    // Test is done, set all values to 0 and turn off
+    test_is_done();
+}
+
+if (kill_switch_status == LOW) { // Armed but not active
+    mode = 3; // "armed (waiting)"
+    system_status = 0;
+
+    if (millis() - prevMillisUpdate >= updateInterval) {
+        prevMillisUpdate = millis();
+
+        // Send and receive PID data
+        sendCommand(pid_controller, "GET", "pid_controller");
+        waitForData(pid_controller, pid_data, 100, "pid_controller");
+
+        // Send and receive measuring device data
+        sendCommand(meassuring_device, "GET", "measuring_device");
+        waitForData(meassuring_device, meassurment_data, 100, "measuring_device");
+
+        command_angle_motor(0);
+
+        // Update display data every 4 cycles
+        if (count_display >= 4) {
+            count_display = 0;
+            send_display_data();
+            Serial.println("System off");
+        }
+        count_display++;
+    }
+}
+
 }
 
 void test_is_done() {
