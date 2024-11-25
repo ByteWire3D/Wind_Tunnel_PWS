@@ -496,25 +496,40 @@ if (kill_switch_status == HIGH) { // Test active
             if (kill_switch_status == LOW) break;
 
             if (millis() - prevMillisUpdate >= updateInterval) {
-                prevMillisUpdate = millis();
+                 prevMillisUpdate = millis();
 
-                // Send and receive PID data
-                sendCommand(pid_controller, "GET", "pid_controller");
-                waitForData(pid_controller, pid_data, 90, "pid_controller");
-                if (kill_switch_status == LOW) break;
+                 // Send and receive PID data
+                 sendCommand(pid_controller, "GET", "pid_controller");
+                 waitForData(pid_controller, pid_data, 90, "pid_controller");
+                 if (kill_switch_status == LOW) break;
 
-                // Send and receive measuring device data
-                sendCommand(meassuring_device, "GET", "measuring_device");
-                waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
+                 // Send and receive measuring device data
+                 sendCommand(meassuring_device, "GET", "measuring_device");
+                 waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
 
-                command_angle_motor(0);
-                pitch = read_target_from_pwm();
+                 command_angle_motor(0);
+                 pitch = read_target_from_pwm();
+                
+                 Serial.print("airspeed: ");
+                 Serial.print(airspeed);
+                 Serial.print("\t");
 
+                 Serial.print("lift: ");
+                 Serial.print(lift_loadcell);
+                 Serial.print("\t");
+
+                 Serial.print("drag: ");
+                 Serial.print(drag_loadcell);
+                 Serial.print("\t");
+
+                 Serial.print("pitch: ");
+                 Serial.print(pitch);
+                 Serial.print("\n");
                 // Update display data every 4 cycles
-                if (count_display >= 4) {
-                    count_display = 0;
-                    send_display_data();
-                }
+                 if (count_display >= 4) {
+                     count_display = 0;
+                     send_display_data();
+                 }
                 count_display++;
 
                 // Log data
@@ -527,8 +542,13 @@ if (kill_switch_status == HIGH) { // Test active
         while (currentAngle <= end_angle) {
             if (kill_switch_status == LOW) break;
 
-            Serial.print("Angle:");
-            Serial.println(currentAngle);
+
+            // Wait for the next step
+            if (millis() - prevMillisUpdate >= updateInterval) {
+                prevMillisUpdate = millis();
+
+                Serial.print("Angle:");
+                Serial.println(currentAngle);
 
             // Perform step actions
             sendCommand(pid_controller, "GET", "pid_controller");
@@ -550,10 +570,7 @@ if (kill_switch_status == HIGH) { // Test active
             // Log data
             send_datalogger();
 
-            // Wait for the next step
-            if (millis() - prevMillisUpdate >= updateInterval) {
-                prevMillisUpdate = millis();
-                currentAngle += 0.2; // Increment angle after delay
+              currentAngle += 0.2; // Increment angle after delay
             }
         }
 
