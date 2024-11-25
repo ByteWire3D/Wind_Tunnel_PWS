@@ -1,6 +1,8 @@
 #include <SoftwareSerial.h>
 #include <ESP32Servo.h>
 
+float rev_airspeed;
+
 float calibrationValue_Lift;
 float calibrationValue_Drag;
 float calibrationValue_Ampere;
@@ -337,10 +339,10 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
         Serial.print("\n");
 */
       } else if (deviceName == "pid_controller") {
-
+Serial.println("yesss got to this partttt");
         // system_status = pid_data.system_status;
         setpoint = pid_data.setpoint;
-        airspeed = pid_data.airspeed;
+        rev_airspeed = pid_data.airspeed;
         error = pid_data.error;
         output = pid_data.output;
         baseline = pid_data.baseline;
@@ -473,7 +475,7 @@ if (kill_switch_status == HIGH) { // Test active
         if (kill_switch_status == LOW) break;
 
         send_setpoint(pid_controller, i);
-
+        
         Serial.println(setpoint);
         recieved_angle = read_target_from_pwm();
         Serial.println(recieved_angle);
@@ -497,11 +499,12 @@ if (kill_switch_status == HIGH) { // Test active
 
             if (millis() - prevMillisUpdate >= updateInterval) {
                  prevMillisUpdate = millis();
+ if (kill_switch_status == LOW) break;
 
                  // Send and receive PID data
                  sendCommand(pid_controller, "GET", "pid_controller");
                  waitForData(pid_controller, pid_data, 90, "pid_controller");
-                 if (kill_switch_status == LOW) break;
+                
 
                  // Send and receive measuring device data
                  sendCommand(meassuring_device, "GET", "meassuring_device");
@@ -511,7 +514,7 @@ if (kill_switch_status == HIGH) { // Test active
                  pitch = read_target_from_pwm();
                 
                  Serial.print("airspeed: ");
-                 Serial.print(airspeed);
+                 Serial.print(rev_airspeed);
                  Serial.print("\t");
 
                  Serial.print("lift: ");
@@ -568,7 +571,7 @@ if (kill_switch_status == HIGH) { // Test active
             count_display++;
 
              Serial.print("airspeed: ");
-                 Serial.print(airspeed);
+                 Serial.print(rev_airspeed);
                  Serial.print("\t");
 
                  Serial.print("lift: ");
@@ -637,7 +640,7 @@ void send_datalogger() {
 
   SDcard_log_data datatosend{
     setpoint,
-    airspeed,
+    rev_airspeed,
     error,
     output,
 
@@ -718,7 +721,7 @@ void send_display_data() {
   Display_data datatosend{
     test_fileName,
     setpoint,
-    airspeed,
+    rev_airspeed,
     error,
     output,
     baseline,
