@@ -504,8 +504,8 @@ if (kill_switch_status == HIGH) { // Test active
                  if (kill_switch_status == LOW) break;
 
                  // Send and receive measuring device data
-                 sendCommand(meassuring_device, "GET", "measuring_device");
-                 waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
+                 sendCommand(meassuring_device, "GET", "meassuring_device");
+                 waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
 
                  command_angle_motor(0);
                  pitch = read_target_from_pwm();
@@ -554,8 +554,8 @@ if (kill_switch_status == HIGH) { // Test active
             sendCommand(pid_controller, "GET", "pid_controller");
             waitForData(pid_controller, pid_data, 90, "pid_controller");
 
-            sendCommand(meassuring_device, "GET", "measuring_device");
-            waitForData(meassuring_device, meassurment_data, 90, "measuring_device");
+            sendCommand(meassuring_device, "GET", "meassuring_device");
+            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
 
             command_angle_motor(currentAngle);
             pitch = read_target_from_pwm();
@@ -567,6 +567,21 @@ if (kill_switch_status == HIGH) { // Test active
             }
             count_display++;
 
+             Serial.print("airspeed: ");
+                 Serial.print(airspeed);
+                 Serial.print("\t");
+
+                 Serial.print("lift: ");
+                 Serial.print(lift_loadcell);
+                 Serial.print("\t");
+
+                 Serial.print("drag: ");
+                 Serial.print(drag_loadcell);
+                 Serial.print("\t");
+
+                 Serial.print("pitch: ");
+                 Serial.print(pitch);
+                 Serial.print("\n");
             // Log data
             send_datalogger();
 
@@ -593,8 +608,8 @@ if (kill_switch_status == LOW) { // Armed but not active
         waitForData(pid_controller, pid_data, 100, "pid_controller");
 
         // Send and receive measuring device data
-        sendCommand(meassuring_device, "GET", "measuring_device");
-        waitForData(meassuring_device, meassurment_data, 100, "measuring_device");
+        sendCommand(meassuring_device, "GET", "meassuring_device");
+        waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
 
         command_angle_motor(0);
 
