@@ -755,7 +755,7 @@ void send_pid_controller_conf_data() {
     p_gain,
     i_gain,
     d_gain,
-    windspeedCount,
+    windspeedCount
   };
   memcpy(datatosend.windspeedList, windspeedList, sizeof(windspeedList));
   sendDataWithRetry(pid_controller, datatosend, 50, 10);
