@@ -140,7 +140,6 @@ struct Messurment_data {
 
 
 struct pid_controller_data {
-  //int system_status;
   float setpoint;
   float airspeed;
   float error;
