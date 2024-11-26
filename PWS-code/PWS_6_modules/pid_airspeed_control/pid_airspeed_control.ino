@@ -17,7 +17,6 @@ struct config_pid_controller {
 };
 
 struct pid_controller_data {
-  //int status;
   float setpoint;
   float airspeed;
   float error;
