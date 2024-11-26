@@ -28,13 +28,8 @@ struct pid_controller_data {
   float d_out;
 };
 
-struct setpoint_data {
-  float setpoint;
-};
 #pragma pack()
 config_pid_controller data_recv;
-setpoint_data setpoint_recv;
-
 int pid_loop_hz;
 int status;
 const int killswitch_pin_pressed = 10;  // killswitch pin
@@ -184,14 +179,13 @@ void loop() {
     setpoint = windspeedList[set];
     pid_controller_data data_send{
       setpoint,
-      gm_airspeed,
+      airspeed_filtered,
       error,
       output,
       baseline_motor_signal,
       Pout,
       Iout,
-      Dout,
-    };
+      Dout };
     handleGetCommand(main_controller, data_send);
 
     if (current_time - previous_time >= interval) {
@@ -209,11 +203,7 @@ void loop() {
 
       //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       airspeed_filtered = 17.91;
-      avrg_count++;
-      avrg_airspeed += airspeed_filtered;
-
-      gm_airspeed = avrg_airspeed / avrg_count;
-
+   
       Serial.print(airspeed_filtered);
       Serial.println(",");
 
@@ -230,22 +220,17 @@ void loop() {
     set = 0;
     digitalWrite(led_pin, LOW);
     // airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    airspeed_filtered = 12.19;
-    avrg_count++;
-    avrg_airspeed += airspeed_filtered;
-
-    gm_airspeed = avrg_airspeed / avrg_count;
+    airspeed_filtered = 12.10;
 
     pid_controller_data data_send{
       setpoint,
-      gm_airspeed,
+      airspeed_filtered,
       error,
       output,
       baseline_motor_signal,
       Pout,
       Iout,
-      Dout,
-    };
+      Dout };
     handleGetCommand(main_controller, data_send);
 
     // Serial.println(status);
@@ -787,25 +772,11 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
     serial.readBytes(command, 3);
     command[3] = '\0';
 
-    if (strcmp(command, "GET") == 0) {
+    if (strcmp(command, "GET") == 0 or strcmp(command, "TGE") == 0 or strcmp(command, "ETG") == 0 ) {
       Serial.println("GET command received");
-      avrg_count = 0;
-      avrg_airspeed = 0;
-      gm_airspeed = 0;
+   
       sendDataWithRetry(main_controller, datatosend, 50, 25);
-    } else if (strcmp(command, "TGE") == 0) {
-      Serial.println("TGE command received");
-      avrg_count = 0;
-      avrg_airspeed = 0;
-        gm_airspeed = 0;
-      sendDataWithRetry(main_controller, datatosend, 50, 25);
-    } else if (strcmp(command, "ETG") == 0) {
-      Serial.println("ETG command received");
-      avrg_count = 0;
-      avrg_airspeed = 0;
-        gm_airspeed = 0;
-      sendDataWithRetry(main_controller, datatosend, 50, 25);
-    } else if (strcmp(command, "s:0") == 0) {
+    }  else if (strcmp(command, "s:0") == 0) {
       Serial.println("s:0 command received");
       sendAcknowledgment(main_controller, "ACK");
 
