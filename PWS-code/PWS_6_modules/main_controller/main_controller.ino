@@ -220,7 +220,7 @@ unsigned long prevMillisUpdate = 0;
 unsigned long prevMillisDisplay = 0;
 
 const unsigned long updateInterval = 200; // 200 ms update interval
-const unsigned long pid_wait_Duration = 7500; // 7500 ms per test step
+const unsigned long pid_wait_Duration = 20000; // 7500 ms per test step
 
 
 template<typename T>
@@ -501,8 +501,8 @@ if (kill_switch_status == HIGH) { // Test active
  if (kill_switch_status == LOW) break;
 
                  // Send and receive PID data
-                 sendCommand(pid_controller, "GET", "pid_controller");
-                 waitForData(pid_controller, pid_data, 90, "pid_controller");
+                 //sendCommand(pid_controller, "GET", "pid_controller");
+                // waitForData(pid_controller, pid_data, 90, "pid_controller");
                 
 
                  // Send and receive measuring device data
@@ -553,8 +553,8 @@ if (kill_switch_status == HIGH) { // Test active
                 Serial.println(currentAngle);
 
             // Perform step actions
-            sendCommand(pid_controller, "GET", "pid_controller");
-            waitForData(pid_controller, pid_data, 90, "pid_controller");
+           // sendCommand(pid_controller, "GET", "pid_controller");
+          //  waitForData(pid_controller, pid_data, 90, "pid_controller");
 
             sendCommand(meassuring_device, "GET", "meassuring_device");
             waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
@@ -606,8 +606,8 @@ if (kill_switch_status == LOW) { // Armed but not active
         prevMillisUpdate = millis();
 
         // Send and receive PID data
-        sendCommand(pid_controller, "GET", "pid_controller");
-        waitForData(pid_controller, pid_data, 100, "pid_controller");
+       // sendCommand(pid_controller, "GET", "pid_controller");
+        //waitForData(pid_controller, pid_data, 100, "pid_controller");
 
         // Send and receive measuring device data
         sendCommand(meassuring_device, "GET", "meassuring_device");

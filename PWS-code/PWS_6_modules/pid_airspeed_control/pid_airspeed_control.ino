@@ -206,7 +206,7 @@ void loop() {
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
 
       //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-      airspeed_filtered = 17.91;
+      airspeed_filtered = 1.2;
    
       Serial.print(airspeed_filtered);
       Serial.println(",");
@@ -237,7 +237,7 @@ void loop() {
     set = 0;
     digitalWrite(led_pin, LOW);
     // airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    airspeed_filtered = 12.10;
+    airspeed_filtered = 1.00;
 
     pid_controller_data data_send{
       setpoint,
