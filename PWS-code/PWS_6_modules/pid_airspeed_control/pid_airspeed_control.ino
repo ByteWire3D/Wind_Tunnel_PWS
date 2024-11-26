@@ -520,7 +520,13 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   output_offset = better_contrain(output, minPulseWidth, 1900);  // Keep the output within safe limits
   output -= output_offset;
 
+if(output <= 1000){
+  output = 1000;
+}
 
+if(baseline <= 1000){
+  baseline = 1000;
+}
   // Update previous error and previous output
   previousError = error;
   previous_output = output;
