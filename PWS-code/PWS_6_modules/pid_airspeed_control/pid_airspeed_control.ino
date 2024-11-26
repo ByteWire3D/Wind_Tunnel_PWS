@@ -119,6 +119,11 @@ HardwareSerial main_controller(0);  //Create a new HardwareSerial class.
 int set = 0;
 const int led_pin = 8;
 
+int wait_count= 0;
+bool keep_speed = false;
+
+float motor_speed;
+int sum_count = 0;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
@@ -208,6 +213,19 @@ void loop() {
 
       //command_motors(1200);
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
+     
+      if(wait_count >= 200){
+        calculate_motor_speed(error, output);
+      } 
+      
+      if(wait_count >= 400){
+        keep_speed = true;
+        wait_count = 0;
+        sum_count = 0;
+      } 
+    }
+    if(keep_speed){
+      command_motors(motor_speed));
     }
   }
   if (system_status == LOW) {
@@ -265,6 +283,14 @@ void loop() {
 
 void hz_inteval(int loop_freqenty) {
   interval = 1000 / loop_freqenty;
+}
+
+void calculate_motor_speed(int error_val,int output_){
+  if(error <= 0.2){
+    sum_count++;
+    avrg_output += output_;
+    motor_speed = avrg_output / sum_count;
+  }
 }
 
 float calc_airspeed_moving_filter() {
@@ -783,39 +809,48 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
     } else if (strcmp(command, "s:1") == 0) {
       Serial.println("s:1 command received");
       sendAcknowledgment(main_controller, "ACK");
-      set = 1;
+      set = 1; 
+      keep_speed = false;
     } else if (strcmp(command, "s:2") == 0) {
       Serial.println("s:2 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 2;
+        keep_speed = false;
     } else if (strcmp(command, "s:3") == 0) {
       Serial.println("s:3 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 3;
+        keep_speed = false;
     } else if (strcmp(command, "s:4") == 0) {
       Serial.println("s:4 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 4;
+        keep_speed = false;
     } else if (strcmp(command, "s:5") == 0) {
       Serial.println("s:5 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 5;
+        keep_speed = false;
     } else if (strcmp(command, "s:6") == 0) {
       Serial.println("s:6 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 6;
+        keep_speed = false;
     } else if (strcmp(command, "s:7") == 0) {
       Serial.println("s:7 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 7;
+        keep_speed = false;
     } else if (strcmp(command, "s:8") == 0) {
       Serial.println("s:8 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 8;
+        keep_speed = false;
     } else if (strcmp(command, "s:9") == 0) {
       Serial.println("s:9 command received");
       sendAcknowledgment(main_controller, "ACK");
       set = 9;
+        keep_speed = false;
     } else if (strcmp(command, "fff") == 0) {
       system_status = LOW;
       motor1.writeMicroseconds(minPulseWidth);
