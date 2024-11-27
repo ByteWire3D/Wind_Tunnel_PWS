@@ -481,7 +481,7 @@ void loop() {
 if (kill_switch_status == HIGH) { // Test active
     mode = 2; // "testing active"
     system_status = 1;
-    Serial.println("System on, running the test --->");
+    //Serial.println("System on, running the test --->");
 
     for (int i = 0; i < total_steps; i++) {
         setpoint = windspeedList[i];
@@ -489,16 +489,16 @@ if (kill_switch_status == HIGH) { // Test active
 
         send_setpoint(pid_controller, i);
         
-        Serial.println(setpoint);
+       // Serial.println(setpoint);
         recieved_angle = read_target_from_pwm();
-        Serial.println(recieved_angle);
+        //Serial.println(recieved_angle);
 
         // Adjust motor until the angle is within tolerance
         while (abs(start_angle - recieved_angle) > 0.5) {
             command_angle_motor(0);
             recieved_angle = read_target_from_pwm();
-            Serial.print("Received angle:");
-            Serial.println(recieved_angle);
+          //  Serial.print("Received angle:");
+            //Serial.println(recieved_angle);
             if (millis() - prevMillisUpdate >= updateInterval) {
                 prevMillisUpdate = millis();
                 // Allow for other operations during angle adjustment
@@ -525,49 +525,51 @@ if (kill_switch_status == HIGH) { // Test active
 
                  command_angle_motor(0);
                  pitch = read_target_from_pwm();
-                
-                 Serial.print("setpoint: ");
+                  Serial.print("current_time; ");
+                 Serial.print(millis() / 1000);
+                 Serial.print(";\t");
+
+                 Serial.print("setpoint; ");
                  Serial.print(setpoint);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("lift: ");
+                 Serial.print("lift; ");
                  Serial.print(lift_loadcell);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("drag: ");
+                 Serial.print("drag; ");
                  Serial.print(drag_loadcell);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("ampere: ");
-                 Serial.print(ampere);
-                 Serial.print("\t");
-
-                 Serial.print("voltage: ");
-                 Serial.print(voltage);
-                 Serial.print("\t");
-
-                 Serial.print("wattage: ");
-                 Serial.print(wattage);
-                 Serial.print("\t");
-
-                 Serial.print("mah_used: ");
-                 Serial.print(mah_used);
-                 Serial.print("\t");
-
-                 Serial.print("pitch: ");
+                 Serial.print("pitch; ");
                  Serial.print(pitch);
-                 Serial.print("\n");
+                 Serial.print(";\t");
 
+                 Serial.print("ampere; ");
+                 Serial.print(ampere);
+                 Serial.print(";\t");
+
+                 Serial.print("voltage; ");
+                 Serial.print(voltage);
+                 Serial.print(";\t");
+
+                 Serial.print("wattage; ");
+                 Serial.print(wattage);
+                 Serial.print(";\t");
+
+                 Serial.print("mah_used; ");
+                 Serial.print(mah_used);
+                 Serial.print(";\n");
 
                 // Update display data every 4 cycles
-                 if (count_display >= 4) {
-                     count_display = 0;
-                     send_display_data();
-                 }
-                count_display++;
+                 //if (count_display >= 4) {
+                  //   count_display = 0;
+                  //   send_display_data();
+               //  }
+               // count_display++;
 
                 // Log data
-                send_datalogger();
+               // send_datalogger();
             }
         }
 
@@ -581,8 +583,8 @@ if (kill_switch_status == HIGH) { // Test active
             if (millis() - prevMillisUpdate >= updateInterval) {
                 prevMillisUpdate = millis();
 
-                Serial.print("Angle:");
-                Serial.println(currentAngle);
+               // Serial.print("Angle:");
+                //Serial.println(currentAngle);
 
             // Perform step actions
            // sendCommand(pid_controller, "GET", "pid_controller");
@@ -595,50 +597,51 @@ if (kill_switch_status == HIGH) { // Test active
             pitch = read_target_from_pwm();
 
             // Update display data every 4 cycles
-            if (count_display >= 4) {
-                count_display = 0;
-                send_display_data();
-            }
-            count_display++;
+          //  if (count_display >= 4) {
+             //   count_display = 0;
+                //send_display_data();
+         //   }
+           // count_display++;
+                 Serial.print("current_time; ");
+                 Serial.print(millis() / 1000);
+                 Serial.print(";\t");
 
-             Serial.print("setpoint: ");
+                 Serial.print("setpoint; ");
                  Serial.print(setpoint);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("lift: ");
+                 Serial.print("lift; ");
                  Serial.print(lift_loadcell);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("drag: ");
+                 Serial.print("drag; ");
                  Serial.print(drag_loadcell);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("pitch: ");
+                 Serial.print("pitch; ");
                  Serial.print(pitch);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("ampere: ");
+                 Serial.print("ampere; ");
                  Serial.print(ampere);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("voltage: ");
+                 Serial.print("voltage; ");
                  Serial.print(voltage);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("wattage: ");
+                 Serial.print("wattage; ");
                  Serial.print(wattage);
-                 Serial.print("\t");
+                 Serial.print(";\t");
 
-                 Serial.print("mah_used: ");
+                 Serial.print("mah_used; ");
                  Serial.print(mah_used);
-                 Serial.print("\t");
+                 Serial.print(";\n");
 
-                 Serial.print("pitch: ");
-                 Serial.print(pitch);
-                 Serial.print("\n");
+                
 
             // Log data
-            send_datalogger();
+          //  send_datalogger();
 
               currentAngle += 0.2; // Increment angle after delay
             }
@@ -669,12 +672,12 @@ if (kill_switch_status == LOW) { // Armed but not active
         command_angle_motor(0);
 
         // Update display data every 4 cycles
-        if (count_display >= 4) {
-            count_display = 0;
-            send_display_data();
-            Serial.println("System off");
-        }
-        count_display++;
+       // if (count_display >= 4) {
+        //    count_display = 0;
+        //    send_display_data();
+        //    Serial.println("System off");
+        //}
+        //count_display++;
     }
 }
 

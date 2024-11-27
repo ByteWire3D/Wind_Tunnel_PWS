@@ -231,10 +231,18 @@ void loop() {
     }
     if(keep_speed){
         if (current_time - previous_time >= 1000) {
+          airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       previous_time = millis();
       command_motors(motor_speed);
-            Serial.print("motor_speed:");
-        Serial.println(motor_speed);
+        Serial.print("current_time; ");
+        Serial.print(millis()/ 1000);
+  Serial.print(";\t");
+            Serial.print("motor_speed;");
+        Serial.print(motor_speed);
+  Serial.print(";\t");
+   Serial.print("airspeed;");
+        Serial.print(airspeed_filtered);
+  Serial.print(";\n");
         }
     }
   }
