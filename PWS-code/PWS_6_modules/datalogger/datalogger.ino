@@ -150,7 +150,8 @@ void setup() {
   // Create a new directory for the current test
   testFolderName = "/test_results/" + String(FolderName) + " (" + String(testCounter) + ") " + String(test_datum);
   createDir(SD, testFolderName.c_str());
-  file_firstline = "Looptime;Loop Number;Setpoint;Airspeed;Error;Output;Lift;Drag;Pitch;Ampere;Voltage;Wattage;Mah Used";
+  //file_firstline = "Looptime;Loop Number;Setpoint;Airspeed;Error;Output;Lift;Drag;Pitch;Ampere;Voltage;Wattage;Mah Used";
+  file_firstline = "Looptime;Setpoint;Lift;Drag;Pitch";
   //Serial.printf("Created folder: %s\n", testFolderName.c_str());
   appendFile(SD, (testFolderName + "/test_data.txt").c_str(), file_firstline);
 
@@ -569,7 +570,8 @@ void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms
       if (deviceName == "main_controller") {
         //Serial.print("data recieved from:");
         // Serial.println(deviceName);
-        string_data = String(data.looptime) + ";" + String(data.loop_number) + ";" + String(data.setpoint) + ";" + String(data.airspeed) + ";" + String(data.error) + ";" + String(data.output) + ";" + String(data.lift_loadcell) + ";" + String(data.drag_loadcell) + ";"+ String(data.pitch) + ";" + String(data.ampere) + ";" + String(data.voltage) + ";" + String(data.wattage) + ";" + String(data.mah_used);
+       // string_data = String(data.looptime) + ";" + String(data.loop_number) + ";" + String(data.setpoint) + ";" + String(data.airspeed) + ";" + String(data.error) + ";" + String(data.output) + ";" + String(data.lift_loadcell) + ";" + String(data.drag_loadcell) + ";"+ String(data.pitch) + ";" + String(data.ampere) + ";" + String(data.voltage) + ";" + String(data.wattage) + ";" + String(data.mah_used);
+        string_data = String(data.looptime) + ";" + String(data.setpoint) + ";" + String(data.lift_loadcell) + ";" + String(data.drag_loadcell) + ";"+ String(data.pitch);
         appendFile(SD, (testFolderName + "/test_data.txt").c_str(), string_data);
       }
       return;
