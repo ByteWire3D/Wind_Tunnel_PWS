@@ -181,6 +181,7 @@ void loop() {
     digitalWrite(led_pin, HIGH);
 
     setpoint = windspeedList[set];
+    /*
     pid_controller_data data_send{
       setpoint,
       airspeed_filtered,
@@ -191,7 +192,7 @@ void loop() {
       Iout,
       Dout };
     handleGetCommand(main_controller, data_send);
-
+*/
     if (current_time - previous_time >= interval) {
       previous_time = millis();
       Serial.println("system is on!-->>>>>");
@@ -205,8 +206,8 @@ void loop() {
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
 
-      //airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-      airspeed_filtered = 1.2;
+      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+      //airspeed_filtered = 1.2;
    
       Serial.print(airspeed_filtered);
       Serial.println(",");
@@ -236,9 +237,11 @@ void loop() {
     setpoint = 0;
     set = 0;
     digitalWrite(led_pin, LOW);
-    // airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-    airspeed_filtered = 1.00;
-
+    airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+     Serial.print(airspeed_filtered);
+      Serial.println(",");
+    //airspeed_filtered = 1.00;
+/*
     pid_controller_data data_send{
       setpoint,
       airspeed_filtered,
@@ -249,7 +252,7 @@ void loop() {
       Iout,
       Dout };
     handleGetCommand(main_controller, data_send);
-
+*/
     // Serial.println(status);
     if (Serial.available()) {
       // Read the input as a string
@@ -812,6 +815,7 @@ void handleGetCommand(HardwareSerial &serial, T &datatosend) {
       sendAcknowledgment(main_controller, "ACK");
 
       set = 0;
+       keep_speed = false;
     } else if (strcmp(command, "s:1") == 0) {
       Serial.println("s:1 command received");
       sendAcknowledgment(main_controller, "ACK");
