@@ -193,7 +193,9 @@ void loop() {
       Iout,
       Dout };
     handleGetCommand(main_controller, data_send);
-*/if(!keep_speed){
+*/
+handleGetCommand(main_controller, data_send);
+if(!keep_speed){
       
     if (current_time - previous_time >= interval) {
       previous_time = millis();
