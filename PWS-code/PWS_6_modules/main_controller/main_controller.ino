@@ -403,9 +403,9 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
     }
   }
 
-  Serial.print("Failed to receive data from ");
-  Serial.print(deviceName);
-  Serial.println(" within the time limit.");
+  //Serial.print("Failed to receive data from ");
+ // Serial.print(deviceName);
+ // Serial.println(" within the time limit.");
 }
 
 void setup() {
