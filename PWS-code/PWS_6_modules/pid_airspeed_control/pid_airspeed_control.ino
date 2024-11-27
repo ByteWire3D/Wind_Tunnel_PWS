@@ -193,7 +193,8 @@ void loop() {
       Iout,
       Dout };
     handleGetCommand(main_controller, data_send);
-*/
+*/if(!keep_speed){
+      
     if (current_time - previous_time >= interval) {
       previous_time = millis();
       Serial.println("system is on!-->>>>>");
@@ -227,8 +228,12 @@ void loop() {
         avrg_output = 0;
       } 
     }
+    }
     if(keep_speed){
+        if (current_time - previous_time >= interval) {
+      previous_time = millis();
       command_motors(motor_speed);
+        }
     }
   }
   if (system_status == LOW) {
