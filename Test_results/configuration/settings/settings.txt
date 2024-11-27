@@ -1,0 +1,10 @@
+pid_loop_hz:20
+measurement_hz:5
+screen_hz:5
+
+p_gain:28.03
+i_gain:0.09
+d_gain:38.49
+
+delta_max:5.0
+deadband:0.01

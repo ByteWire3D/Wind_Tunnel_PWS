@@ -1,0 +1,21 @@
+speed:varing
+angle:dynamic
+time:constant
+
+FolderName:Bergey BW-3
+test_datum:27.11.2024
+
+pid_loop_hz:20
+measurement_hz:5
+screen_hz:5
+
+start_angle:0
+end_angle:45
+
+time_step:55
+angle_steps:1
+total_steps:6
+
+windspeed:2.84;4.83;6.82;8.80;10.79;12.78
+
+

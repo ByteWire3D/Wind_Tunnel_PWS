@@ -1,0 +1,4 @@
+calibrationValue_Lift:-800.00
+calibrationValue_Drag:-2900.00
+calibrationValue_Ampere:1.387184608
+calibrationValue_Airspeed:1.903185767
