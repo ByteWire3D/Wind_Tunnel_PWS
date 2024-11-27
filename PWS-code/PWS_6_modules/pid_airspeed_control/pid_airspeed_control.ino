@@ -157,7 +157,7 @@ void setup() {
 
   hz_inteval(pid_loop_hz);  //convertes hz to looptime
   // Calibrate the sensor
-    //calibrate();  // clibrate airspeed ---> no zeroaisoeed value saved!!!!
+  calibrate();  // clibrate airspeed ---> no zeroaisoeed value saved!!!!
 
   while (system_status == HIGH) {
     delay(100);
