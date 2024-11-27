@@ -338,7 +338,6 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
         Serial.print("\n");
 */
       } else if (deviceName == "pid_controller") {
-Serial.println("yesss got to this partttt");
         // system_status = pid_data.system_status;
         setpoint = pid_data.setpoint;
         rev_airspeed = pid_data.airspeed;
@@ -498,7 +497,7 @@ if (kill_switch_status == HIGH) { // Test active
 
             if (millis() - prevMillisUpdate >= updateInterval) {
                  prevMillisUpdate = millis();
- if (kill_switch_status == LOW) break;
+                if (kill_switch_status == LOW) break;
 
                  // Send and receive PID data
                  //sendCommand(pid_controller, "GET", "pid_controller");
@@ -569,8 +568,8 @@ if (kill_switch_status == HIGH) { // Test active
             }
             count_display++;
 
-             Serial.print("airspeed: ");
-                 Serial.print(rev_airspeed);
+             Serial.print("setpoint: ");
+                 Serial.print(setpoint);
                  Serial.print("\t");
 
                  Serial.print("lift: ");
