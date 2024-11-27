@@ -124,6 +124,7 @@ bool keep_speed = false;
 
 float motor_speed;
 int sum_count = 0;
+float avrg_output = 0;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
@@ -223,6 +224,7 @@ void loop() {
         keep_speed = true;
         wait_count = 0;
         sum_count = 0;
+        avrg_output = 0;
       } 
     }
     if(keep_speed){
