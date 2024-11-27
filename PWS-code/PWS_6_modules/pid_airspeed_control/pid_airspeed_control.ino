@@ -226,7 +226,7 @@ void loop() {
       } 
     }
     if(keep_speed){
-      command_motors(motor_speed));
+      command_motors(motor_speed);
     }
   }
   if (system_status == LOW) {
