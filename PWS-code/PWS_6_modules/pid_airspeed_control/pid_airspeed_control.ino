@@ -230,9 +230,11 @@ void loop() {
     }
     }
     if(keep_speed){
-        if (current_time - previous_time >= interval) {
+        if (current_time - previous_time >= 1000) {
       previous_time = millis();
       command_motors(motor_speed);
+            Serial.print("motor_speed:");
+        Serial.println(motor_speed);
         }
     }
   }
