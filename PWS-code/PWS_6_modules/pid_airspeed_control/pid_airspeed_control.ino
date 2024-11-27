@@ -529,8 +529,8 @@ if(output <= 1000){
   output = 1000;
 }
 
-if(baseline <= 1000){
-  baseline = 1000;
+if(baseline_motor_signal <= 1000){
+  baseline_motor_signal = 1000;
 }
   // Update previous error and previous output
   previousError = error;
