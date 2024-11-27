@@ -160,10 +160,12 @@ void setup() {
 }
 
 void loop() {
-  unsigned long loopDuration = millis() - previousMillis;
-  loopFrequency = 1000 / loopDuration;
-  previousMillis = millis();
-  waitForData(main_controller, data_rcv, 200, "main_controller");
+   if (millis() - previousMillis >= 200) {
+    unsigned long loopDuration = millis() - previousMillis;
+    loopFrequency = 1000 / loopDuration;
+    previousMillis = millis();
+    waitForData(main_controller, data_rcv, 200, "main_controller");
+  }
 }
 
 void setup_sdcard() {
