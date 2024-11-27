@@ -197,22 +197,23 @@ void loop() {
       
     if (current_time - previous_time >= interval) {
       previous_time = millis();
-      Serial.println("system is on!-->>>>>");
-      Serial.println(setpoint);
+      //Serial.println("system is on!-->>>>>");
+      //Serial.println(setpoint);
 
       //Read raw pressure values from sensor
 
       //airspeed = calc_airspeed_moving_filter();
-      //Serial.print(airspeed);
+     // Serial.print(airspeed);
       // Serial.println(",");
 
       //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
 
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       //airspeed_filtered = 1.2;
-   
-      Serial.print(airspeed_filtered);
-      Serial.println(",");
+       Serial.print("current_time; ");
+       Serial.print(millis()/ 1000);
+       Serial.print(";\t");
+  
 
       //command_motors(1200);
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
@@ -230,26 +231,26 @@ void loop() {
     }
     }
     if(keep_speed){
-        if (current_time - previous_time >= 1000) {
+        if (current_time - previous_time >= 200) {
           airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       previous_time = millis();
       command_motors(motor_speed);
         Serial.print("current_time; ");
         Serial.print(millis()/ 1000);
-  Serial.print(";\t");
-            Serial.print("motor_speed;");
+        Serial.print(";\t");
+        Serial.print("motor_speed;");
         Serial.print(motor_speed);
-  Serial.print(";\t");
-   Serial.print("airspeed;");
+        Serial.print(";\t");
+        Serial.print("airspeed;");
         Serial.print(airspeed_filtered);
-  Serial.print(";\n");
+        Serial.print(";\n");
         }
     }
   }
   if (system_status == LOW) {
     if (current_time - previous_time >= 1000) {
       previous_time = millis();
-      Serial.println("system is off");
+      //Serial.println("system is off");
     }
         if (current_time - previous_time >= interval) {
       previous_time = millis();
@@ -257,8 +258,8 @@ void loop() {
     set = 0;
     digitalWrite(led_pin, LOW);
     airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-     Serial.print(airspeed_filtered);
-      Serial.println(",");
+    // Serial.print(airspeed_filtered);
+     // Serial.println(",");
     //airspeed_filtered = 1.00;
         }
 /*
@@ -562,28 +563,28 @@ if(baseline_motor_signal <= 1000){
   // Debugging info
   Serial.print("setpoint: ");
   Serial.print(setpoint);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("airspeed: ");
   Serial.print(airspeed);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("error: ");
   Serial.print(error);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("Pout: ");
   Serial.print(Pout);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("Iout: ");
   Serial.print(Iout);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("Dout: ");
   Serial.print(Dout);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("Output: ");
   Serial.print(output);
-  Serial.print("\t");
+  Serial.print(";\t");
   Serial.print("Baseline: ");
   Serial.print(baseline_motor_signal);
-  Serial.print("\n");
+  Serial.print(";\n");
 
 
   // Command motors with the final output
@@ -630,27 +631,27 @@ void airspeed_pid(float airspeed, float setpoint) {
     // Update previous error
     previousError = error;
     output = round(output);
-    Serial.print("setpoint: ");
+    Serial.print("setpoint; ");
     Serial.print(setpoint);
     Serial.print("\t");
-    Serial.print("airspeed: ");
+    Serial.print("airspeed; ");
     Serial.print(airspeed);
     Serial.print("\t");
 
 
-    Serial.print("error: ");
+    Serial.print("error; ");
     Serial.print(error);
     Serial.print("\t");
-    Serial.print("Pout: ");
+    Serial.print("Pout; ");
     Serial.print(Pout);
     Serial.print("\t");
-    Serial.print("Iout: ");
+    Serial.print("Iout; ");
     Serial.print(Iout);
     Serial.print("\t");
-    Serial.print("Dout: ");
+    Serial.print("Dout; ");
     Serial.print(Dout);
     Serial.print("\t");
-    Serial.print("Output: ");
+    Serial.print("Output; ");
     Serial.print(output);
     Serial.print("\n");
   } else {
