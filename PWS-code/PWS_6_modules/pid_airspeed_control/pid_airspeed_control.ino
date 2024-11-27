@@ -236,6 +236,8 @@ void loop() {
       previous_time = millis();
       Serial.println("system is off");
     }
+        if (current_time - previous_time >= interval) {
+      previous_time = millis();
     setpoint = 0;
     set = 0;
     digitalWrite(led_pin, LOW);
@@ -243,6 +245,7 @@ void loop() {
      Serial.print(airspeed_filtered);
       Serial.println(",");
     //airspeed_filtered = 1.00;
+        }
 /*
     pid_controller_data data_send{
       setpoint,
