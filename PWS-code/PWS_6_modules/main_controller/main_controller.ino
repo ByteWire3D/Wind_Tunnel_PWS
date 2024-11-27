@@ -153,8 +153,8 @@ struct pid_controller_data {
 struct setpoint_data {
   float setpoint;
 };
-
-struct Display_data {
+/*
+struct display_data_recv {
   String file_name;
   float setpoint;
   float airspeed;
@@ -179,6 +179,21 @@ struct Display_data {
   float p_gain;
   float i_gain;
   float d_gain;
+};
+*/
+
+struct Display_data {
+  float setpoint;
+  float lift;
+  float drag;
+  float pitch;
+  float ampere;
+  float voltage;
+  float wattage;
+  float mah_used;
+  int status;
+  int mode;
+  int time_seconds;
 };
 #pragma pack()
 
@@ -511,8 +526,8 @@ if (kill_switch_status == HIGH) { // Test active
                  command_angle_motor(0);
                  pitch = read_target_from_pwm();
                 
-                 Serial.print("airspeed: ");
-                 Serial.print(rev_airspeed);
+                 Serial.print("setpoint: ");
+                 Serial.print(setpoint);
                  Serial.print("\t");
 
                  Serial.print("lift: ");
@@ -523,9 +538,27 @@ if (kill_switch_status == HIGH) { // Test active
                  Serial.print(drag_loadcell);
                  Serial.print("\t");
 
+                 Serial.print("ampere: ");
+                 Serial.print(ampere);
+                 Serial.print("\t");
+
+                 Serial.print("voltage: ");
+                 Serial.print(voltage);
+                 Serial.print("\t");
+
+                 Serial.print("wattage: ");
+                 Serial.print(wattage);
+                 Serial.print("\t");
+
+                 Serial.print("mah_used: ");
+                 Serial.print(mah_used);
+                 Serial.print("\t");
+
                  Serial.print("pitch: ");
                  Serial.print(pitch);
                  Serial.print("\n");
+
+
                 // Update display data every 4 cycles
                  if (count_display >= 4) {
                      count_display = 0;
@@ -582,7 +615,28 @@ if (kill_switch_status == HIGH) { // Test active
 
                  Serial.print("pitch: ");
                  Serial.print(pitch);
+                 Serial.print("\t");
+
+                 Serial.print("ampere: ");
+                 Serial.print(ampere);
+                 Serial.print("\t");
+
+                 Serial.print("voltage: ");
+                 Serial.print(voltage);
+                 Serial.print("\t");
+
+                 Serial.print("wattage: ");
+                 Serial.print(wattage);
+                 Serial.print("\t");
+
+                 Serial.print("mah_used: ");
+                 Serial.print(mah_used);
+                 Serial.print("\t");
+
+                 Serial.print("pitch: ");
+                 Serial.print(pitch);
                  Serial.print("\n");
+
             // Log data
             send_datalogger();
 
@@ -713,6 +767,7 @@ void send_setpoint(Stream &serial, int i) {
   serial.write(command, strlen(command));
 }
 void send_display_data() {
+  /*
   float motor_1 = output;
   float motor_2 = output;
   time_seconds = millis() / 1000;
@@ -741,6 +796,21 @@ void send_display_data() {
     p_gain,
     i_gain,
     d_gain
+  };
+  */
+   time_seconds = millis() / 1000;
+   Display_data datatosend{
+    setpoint,
+    lift_loadcell,
+    drag_loadcell,
+    pitch,
+    ampere,
+    voltage,
+    wattage,
+    mah_used,
+    system_status,
+    mode,
+    time_seconds
   };
   sendData(display, datatosend);
 }

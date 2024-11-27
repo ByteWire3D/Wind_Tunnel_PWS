@@ -64,6 +64,7 @@ int word_count = 0;
 int list_count = 0;
 volatile long prev_millis = 0;
 #pragma pack(1)
+/*
 struct display_data_recv {
   String file_name;
   float setpoint;
@@ -89,6 +90,20 @@ struct display_data_recv {
   float p_gain;
   float i_gain;
   float d_gain;
+};
+*/
+struct display_data_recv {
+  float setpoint;
+  float lift;
+  float drag;
+  float pitch;
+  float ampere;
+  float voltage;
+  float wattage;
+  float mah_used;
+  int status;
+  int mode;
+  int time_seconds;
 };
 #pragma pack()
 String status_text = "";
@@ -785,8 +800,10 @@ template<typename T>
 void recieveData_nodelay(HardwareSerial &serial, T &data, const char *deviceName) {
   if (receiveData(serial, data)) {
     if (deviceName == "main_controller") {
+
       recieve = true;
       count = 0;
+      /*
       file_name = data.file_name;
       setpoint = data.setpoint;
 
@@ -819,7 +836,40 @@ void recieveData_nodelay(HardwareSerial &serial, T &data, const char *deviceName
       p_gain = data.p_gain;
       i_gain = data.i_gain;
       d_gain = data.d_gain;
+*/
+     //file_name = data.file_name;
+      setpoint = data.setpoint;
 
+      airspeed = 0;
+      error = 0;
+
+      output = 0;
+      baseline = 0;
+      motor_1 = 0;
+      motor_2 = 0;
+
+      lift = data.lift;
+      drag = data.drag;
+      pitch = data.pitch;
+
+      ampere = data.ampere;
+      voltage = data.voltage;
+      wattage = data.wattage;
+      mah_used = data.mah_used;
+
+      status = data.status;
+      mode = data.mode;
+
+      time_seconds = data.time_seconds;
+
+      p_out = 0;
+      i_out =0 ;
+      d_out = 0;
+
+      p_gain =0 ;
+      i_gain = 0;
+      d_gain = 0;
+      /*
       Serial.print("File Name: ");
       Serial.println(data.file_name);
 
@@ -895,6 +945,7 @@ void recieveData_nodelay(HardwareSerial &serial, T &data, const char *deviceName
       show_display();
       Serial.print("status: ");
       Serial.println(status);
+      */
     }
     return;
   }
