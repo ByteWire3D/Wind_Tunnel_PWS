@@ -525,6 +525,8 @@ if (kill_switch_status == HIGH) { // Test active
 
                  command_angle_motor(0);
                  pitch = read_target_from_pwm();
+                 Serial.print("Waiting for PID;");
+                 Serial.print("\t");
                   Serial.print("current_time; ");
                  Serial.print(millis() / 1000);
                  Serial.print(";\t");
@@ -602,6 +604,8 @@ if (kill_switch_status == HIGH) { // Test active
                 //send_display_data();
          //   }
            // count_display++;
+             Serial.print("Testing;");
+              Serial.print("\t");
                  Serial.print("current_time; ");
                  Serial.print(millis() / 1000);
                  Serial.print(";\t");
