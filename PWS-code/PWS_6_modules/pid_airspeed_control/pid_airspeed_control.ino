@@ -245,7 +245,7 @@ if(!keep_speed){
         Serial.print(",\t");
        // Serial.print("airspeed;");
         Serial.print(airspeed_filtered);
-        Serial.print(",\n");
+        Serial.print("\n");
         }
     }
   }
@@ -586,7 +586,7 @@ if(baseline_motor_signal <= 1000){
   Serial.print(",\t");
  // Serial.print("Baseline: ");
   Serial.print(baseline_motor_signal);
-  Serial.print(",\n");
+  Serial.print("\n");
 
 
   // Command motors with the final output
