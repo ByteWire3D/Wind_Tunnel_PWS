@@ -117,9 +117,9 @@ void setup() {
   main_controller.begin(115200);
   while (!main_controller) { delay(10); }
   delay(1000);
-  if (!performHandshake(main_controller, 5000)) {
-    Serial.println("Communication failed. Unable to proceed.");
-    return;
+  while (!performHandshake(main_controller, 1000)) {
+  //  Serial.println("Communication failed. Unable to proceed.");
+    delay(10);
   }
   // Initialize SPI and SD card
   setup_sdcard();

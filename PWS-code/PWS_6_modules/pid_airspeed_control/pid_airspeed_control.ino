@@ -149,7 +149,10 @@ void setup() {
 
   delay(3000);
   Serial.println("waiting for handshake or shmt");
-  performHandshake(main_controller, 5000);
+    while (!performHandshake(main_controller, 1000)) {
+  //  Serial.println("Communication failed. Unable to proceed.");
+    delay(10);
+  }
   handleSetCommand(main_controller, data_recv);
 
   pinMode(killswitch_pin_pressed, INPUT_PULLUP);
