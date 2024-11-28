@@ -407,10 +407,10 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
  // Serial.print(deviceName);
  // Serial.println(" within the time limit.");
 }
-
+bool test_begin = false;
 void setup() {
   Serial.begin(115200);
-  while (!Serial) { delay(10); }
+ // while (!Serial) { delay(10); }
   Serial.println("serial port open!");
   sd_card.begin(115200);
   pid_controller.begin(9600);
@@ -482,7 +482,28 @@ if (kill_switch_status == HIGH) { // Test active
     mode = 2; // "testing active"
     system_status = 1;
     //Serial.println("System on, running the test --->");
-
+if(!test_begin){
+                 Serial.print("Data Flag,");
+  
+                 Serial.print("Time, ");
+              
+                 Serial.print("setpoint, ");
+    
+                 Serial.print("lift, ");
+        
+                 Serial.print("drag, ");
+          
+                 Serial.print("pitch, ");
+      
+                 Serial.print("ampere, ");
+               
+                 Serial.print("voltage, ");
+        
+                 Serial.print("wattage; ");
+            
+                 Serial.println("mah_used, ");
+                 test_begin = true;
+}
     for (int i = 0; i < total_steps; i++) {
         setpoint = windspeedList[i];
         if (kill_switch_status == LOW) break;
@@ -528,7 +549,7 @@ if (kill_switch_status == HIGH) { // Test active
                  Serial.print("Waiting for PID,");
                  Serial.print("\t");
                  // Serial.print("current_time, ");
-                 Serial.print(millis() / 1000);
+                 Serial.print(millis());
                  Serial.print(",\t");
 
                 // Serial.print("setpoint, ");
@@ -601,7 +622,7 @@ if (kill_switch_status == HIGH) { // Test active
                  Serial.print("Testing,");
                  Serial.print("\t");
                  // Serial.print("current_time, ");
-                 Serial.print(millis() / 1000);
+                 Serial.print(millis());
                  Serial.print(",\t");
 
                 // Serial.print("setpoint, ");
@@ -691,6 +712,7 @@ void test_is_done() {
   kill_switch_status = LOW;
   count_display = 4;
   system_status = 0;
+  test_begin = false;
 }
 void send_datalogger() {
   looptime = millis();
@@ -736,8 +758,8 @@ void command_angle_motor(float angle) {
 float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
-  Serial.print(pulseWidth);
-  Serial.print("\t");
+  //Serial.print(pulseWidth);
+ // Serial.print("\t");
 
   float angle = map(pulseWidth, 100, 500, 0, 4500);
   angle /= 100;
@@ -954,6 +976,7 @@ void killswitch() {
     // Motor control based on the new state
     if (kill_switch_status == LOW) {  // kill the motors
                                       // reset the test loop so: return to beginn
+      test_begin = false;
     }
     if (kill_switch_status == HIGH) {
     }
