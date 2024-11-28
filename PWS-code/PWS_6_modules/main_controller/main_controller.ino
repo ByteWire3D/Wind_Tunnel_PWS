@@ -525,50 +525,50 @@ if (kill_switch_status == HIGH) { // Test active
 
                  command_angle_motor(0);
                  pitch = read_target_from_pwm();
-                 Serial.print("Waiting for PID;");
+                 Serial.print("Waiting for PID,");
                  Serial.print("\t");
-                  Serial.print("current_time; ");
+                 // Serial.print("current_time, ");
                  Serial.print(millis() / 1000);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("setpoint; ");
+                // Serial.print("setpoint, ");
                  Serial.print(setpoint);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("lift; ");
+                 //Serial.print("lift, ");
                  Serial.print(lift_loadcell);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("drag; ");
+                // Serial.print("drag; ");
                  Serial.print(drag_loadcell);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("pitch; ");
+            //     Serial.print("pitch; ");
                  Serial.print(pitch);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("ampere; ");
+                // Serial.print("ampere; ");
                  Serial.print(ampere);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("voltage; ");
+                // Serial.print("voltage; ");
                  Serial.print(voltage);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("wattage; ");
+                 //Serial.print("wattage; ");
                  Serial.print(wattage);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("mah_used; ");
+               //  Serial.print("mah_used; ");
                  Serial.print(mah_used);
-                 Serial.print(";\n");
+                 Serial.print(",\n");
 
                 // Update display data every 4 cycles
-                 //if (count_display >= 4) {
-                  //   count_display = 0;
-                  //   send_display_data();
-               //  }
-               // count_display++;
+                 if (count_display >= 4) {
+                   count_display = 0;
+                   send_display_data();
+                }
+                count_display++;
 
                 // Log data
                // send_datalogger();
@@ -598,52 +598,50 @@ if (kill_switch_status == HIGH) { // Test active
             command_angle_motor(currentAngle);
             pitch = read_target_from_pwm();
 
-            // Update display data every 4 cycles
-          //  if (count_display >= 4) {
-             //   count_display = 0;
-                //send_display_data();
-         //   }
-           // count_display++;
-             Serial.print("Testing;");
-              Serial.print("\t");
-                 Serial.print("current_time; ");
+                 Serial.print("Testing,");
+                 Serial.print("\t");
+                 // Serial.print("current_time, ");
                  Serial.print(millis() / 1000);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("setpoint; ");
+                // Serial.print("setpoint, ");
                  Serial.print(setpoint);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("lift; ");
+                 //Serial.print("lift, ");
                  Serial.print(lift_loadcell);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("drag; ");
+                // Serial.print("drag; ");
                  Serial.print(drag_loadcell);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("pitch; ");
+            //     Serial.print("pitch; ");
                  Serial.print(pitch);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("ampere; ");
+                // Serial.print("ampere; ");
                  Serial.print(ampere);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("voltage; ");
+                // Serial.print("voltage; ");
                  Serial.print(voltage);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("wattage; ");
+                 //Serial.print("wattage; ");
                  Serial.print(wattage);
-                 Serial.print(";\t");
+                 Serial.print(",\t");
 
-                 Serial.print("mah_used; ");
+               //  Serial.print("mah_used; ");
                  Serial.print(mah_used);
-                 Serial.print(";\n");
+                 Serial.print(",\n");
 
-                
-
+                // Update display data every 4 cycles
+                 if (count_display >= 4) {
+                   count_display = 0;
+                   send_display_data();
+                }
+                count_display++;
             // Log data
           //  send_datalogger();
 
