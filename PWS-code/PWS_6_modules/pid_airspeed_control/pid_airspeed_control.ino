@@ -125,6 +125,8 @@ bool keep_speed = false;
 float motor_speed;
 int sum_count = 0;
 float avrg_output = 0;
+bool test_begin = false;
+
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
@@ -180,7 +182,28 @@ void loop() {
 
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
-
+if(!test_begin){
+                 Serial.print("Data Flag,");
+  
+                 Serial.print("Time, ");
+              
+                 Serial.print("Airspeed, ");
+    
+                 Serial.print("Output, ");
+                
+                 Serial.print("Setpoint, ");
+        
+                 Serial.print("Error, ");
+   
+                 Serial.print("P out, ");
+          
+                 Serial.print("I out, ");
+      
+                 Serial.print("D out, ");
+               
+                 Serial.println("Baseline Signal, ");
+                 test_begin = true;
+}
     setpoint = windspeedList[set];
     /*
     pid_controller_data data_send{
@@ -213,11 +236,11 @@ if(!keep_speed){
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       //airspeed_filtered = 1.2;
      //  Serial.print("current_time, ");
-       Serial.print(millis()/ 1000);
-       Serial.print(",\t");
+      
   
 
       //command_motors(1200);
+    
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
      
       if(wait_count >= 200){
@@ -237,14 +260,16 @@ if(!keep_speed){
           airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       previous_time = millis();
       command_motors(motor_speed);
+          Serial.print("keep speed");
+               Serial.print(",\t");
        // Serial.print("current_time; ");
-        Serial.print(millis()/ 1000);
-        Serial.print(",\t");
-        //Serial.print("motor_speed;");
-        Serial.print(motor_speed);
+        Serial.print(millis());
         Serial.print(",\t");
        // Serial.print("airspeed;");
         Serial.print(airspeed_filtered);
+        Serial.print(",\t");
+        //Serial.print("motor_speed;");
+        Serial.print(motor_speed);
         Serial.print("\n");
         }
     }
@@ -465,6 +490,7 @@ void killswitch() {
       output = 1000;
       baseline_motor_signal = 1000;
       previous_output = 1000;
+      test_begin = false;
     }
     if (system_status == HIGH) {
     }
@@ -543,7 +569,7 @@ void moving_baseline_pid(float airspeed, float setpoint) {
   //output = round(output);
   // baseline_motor_signal = round(baseline_motor_signal);
   // Constrain the output and command motors
-  output_offset = better_contrain(output, minPulseWidth, 1900);  // Keep the output within safe limits
+  output_offset = better_contrain(output, minPulseWidth, 2000);  // Keep the output within safe limits
   output -= output_offset;
 
 if(output <= 1000){
@@ -563,11 +589,18 @@ if(baseline_motor_signal <= 1000){
   // Serial.println(airspeed);
 
   // Debugging info
+    Serial.print("pid find speed");
+      Serial.print(",\t");
+   Serial.print(millis());
+       Serial.print(",\t");
+    //Serial.print("airspeed: ");
+    Serial.print(airspeed);
+  Serial.print(",\t");
+  //  Serial.print("Output: ");
+  Serial.print(output);
+  Serial.print(",\t");
   //Serial.print("setpoint: ");
   Serial.print(setpoint);
-  Serial.print(",\t");
-  //Serial.print("airspeed: ");
-  Serial.print(airspeed);
   Serial.print(",\t");
  // Serial.print("error: ");
   Serial.print(error);
@@ -580,9 +613,6 @@ if(baseline_motor_signal <= 1000){
   Serial.print(",\t");
  // Serial.print("Dout: ");
   Serial.print(Dout);
-  Serial.print(",\t");
-//  Serial.print("Output: ");
-  Serial.print(output);
   Serial.print(",\t");
  // Serial.print("Baseline: ");
   Serial.print(baseline_motor_signal);
@@ -900,6 +930,7 @@ void handleGetCommand(HardwareSerial &serial) { // , T &datatosend
       output = 1000;
       baseline_motor_signal = 1000;
       previous_output = 1000;
+      test_begin = false;
     } else {
       Serial.print("other data recieved: ");
       Serial.println(command);
