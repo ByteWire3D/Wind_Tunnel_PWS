@@ -194,7 +194,7 @@ void loop() {
       Dout };
     handleGetCommand(main_controller, data_send);
 */
-handleGetCommand(main_controller, data_send);
+handleGetCommand(main_controller); //, data_send
 if(!keep_speed){
       
     if (current_time - previous_time >= interval) {
@@ -823,7 +823,7 @@ bool performHandshake(HardwareSerial &serial, unsigned long timeout_ms) {
   return false;
 }
 template<typename T>
-void handleGetCommand(HardwareSerial &serial, T &datatosend) {
+void handleGetCommand(HardwareSerial &serial) { // , T &datatosend
   if (serial.available() >= 3) {
     char command[4];
     serial.readBytes(command, 3);
