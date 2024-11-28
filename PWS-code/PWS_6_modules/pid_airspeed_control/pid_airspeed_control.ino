@@ -832,7 +832,7 @@ void handleGetCommand(HardwareSerial &serial) { // , T &datatosend
     if (strcmp(command, "GET") == 0 or strcmp(command, "TGE") == 0 or strcmp(command, "ETG") == 0 ) {
       Serial.println("GET command received");
    
-      sendDataWithRetry(main_controller, datatosend, 50, 25);
+      //sendDataWithRetry(main_controller, datatosend, 50, 25);
     }  else if (strcmp(command, "s:0") == 0) {
       Serial.println("s:0 command received");
       sendAcknowledgment(main_controller, "ACK");
