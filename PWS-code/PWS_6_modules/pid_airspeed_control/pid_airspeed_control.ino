@@ -718,7 +718,7 @@ void dumpPIDValues() {
   Serial.print("D = ");
   Serial.println(Kd);
 }
-//template<typename T>
+template<typename T>
 void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
 
@@ -822,7 +822,7 @@ bool performHandshake(HardwareSerial &serial, unsigned long timeout_ms) {
   Serial.println("Handshake failed.");
   return false;
 }
-template<typename T>
+//template<typename T>
 void handleGetCommand(HardwareSerial &serial) { // , T &datatosend
   if (serial.available() >= 3) {
     char command[4];
