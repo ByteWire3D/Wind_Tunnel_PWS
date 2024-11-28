@@ -718,7 +718,7 @@ void dumpPIDValues() {
   Serial.print("D = ");
   Serial.println(Kd);
 }
-template<typename T>
+//template<typename T>
 void waitForData(HardwareSerial &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
   unsigned long start_time = millis();
 
