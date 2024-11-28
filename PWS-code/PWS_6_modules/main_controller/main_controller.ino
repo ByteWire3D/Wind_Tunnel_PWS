@@ -434,14 +434,14 @@ void setup() {
   command_angle_motor(0);
 
   while (!performHandshake(sd_card, 2000)) {
-    Serial.println("sd_card communication failed.");
+    //Serial.println("sd_card communication failed.");
   }
   Serial.print("time it took to get a handshake with sd_card: ");
   Serial.println(millis() - start_check);
   start_check = millis();
   meassuring_device.listen();  // Switch to meassuring_device before communication
   while (!performHandshake(meassuring_device, 2000)) {
-    Serial.println("meassuring_device communication failed.");
+    //Serial.println("meassuring_device communication failed.");
   }
 
   Serial.print("time it took to get a handshake with meassuring device: ");
@@ -450,7 +450,7 @@ void setup() {
   start_check = millis();
 
   while (!performHandshake(pid_controller, 2000)) {
-    Serial.println("pid_controller communication failed.");
+    //Serial.println("pid_controller communication failed.");
   }
 
   Serial.print("time it took to get a handshake with pid_controller: ");
