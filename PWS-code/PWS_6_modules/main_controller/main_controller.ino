@@ -411,6 +411,7 @@ bool test_begin = false;
 void setup() {
   Serial.begin(115200);
  // while (!Serial) { delay(10); }
+  delay(500);
   Serial.println("serial port open!");
   sd_card.begin(115200);
   pid_controller.begin(9600);
@@ -432,14 +433,14 @@ void setup() {
 
   command_angle_motor(0);
 
-  if (!performHandshake(sd_card, 5000)) {
+  if (!performHandshake(sd_card, 10000)) {
     Serial.println("sd_card communication failed.");
   }
   Serial.print("time it took to get a handshake with sd_card: ");
   Serial.println(millis() - start_check);
   start_check = millis();
   meassuring_device.listen();  // Switch to meassuring_device before communication
-  if (!performHandshake(meassuring_device, 5000)) {
+  if (!performHandshake(meassuring_device, 10000)) {
     Serial.println("meassuring_device communication failed.");
   }
 
@@ -448,7 +449,7 @@ void setup() {
 
   start_check = millis();
 
-  if (!performHandshake(pid_controller, 5000)) {
+  if (!performHandshake(pid_controller, 10000)) {
     Serial.println("pid_controller communication failed.");
   }
 
