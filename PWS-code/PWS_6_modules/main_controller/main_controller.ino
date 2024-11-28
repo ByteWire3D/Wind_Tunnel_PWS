@@ -942,7 +942,7 @@ void sendAcknowledgment(Stream &serial, const char *ackMessage) {
 bool performHandshake(Stream &serial, unsigned long timeout_ms) {
   unsigned long start_time = millis();
 
-  clearSerialBuffer(serial);  // Clear the buffer before starting handshake
+   clearSerialBuffer(serial);  // Clear the buffer before starting handshake
 
   // Wait for the ping message within the specified timeout
   while (millis() - start_time < timeout_ms) {
