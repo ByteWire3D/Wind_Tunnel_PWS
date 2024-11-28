@@ -561,7 +561,7 @@ if (kill_switch_status == HIGH) { // Test active
 
                //  Serial.print("mah_used; ");
                  Serial.print(mah_used);
-                 Serial.print(",\n");
+                 Serial.print("\n");
 
                 // Update display data every 4 cycles
                  if (count_display >= 4) {
@@ -634,7 +634,7 @@ if (kill_switch_status == HIGH) { // Test active
 
                //  Serial.print("mah_used; ");
                  Serial.print(mah_used);
-                 Serial.print(",\n");
+                 Serial.print("\n");
 
                 // Update display data every 4 cycles
                  if (count_display >= 4) {
