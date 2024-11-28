@@ -212,9 +212,9 @@ if(!keep_speed){
 
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       //airspeed_filtered = 1.2;
-       Serial.print("current_time; ");
+     //  Serial.print("current_time, ");
        Serial.print(millis()/ 1000);
-       Serial.print(";\t");
+       Serial.print(",\t");
   
 
       //command_motors(1200);
@@ -237,15 +237,15 @@ if(!keep_speed){
           airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       previous_time = millis();
       command_motors(motor_speed);
-        Serial.print("current_time; ");
+       // Serial.print("current_time; ");
         Serial.print(millis()/ 1000);
-        Serial.print(";\t");
-        Serial.print("motor_speed;");
+        Serial.print(",\t");
+        //Serial.print("motor_speed;");
         Serial.print(motor_speed);
-        Serial.print(";\t");
-        Serial.print("airspeed;");
+        Serial.print(",\t");
+       // Serial.print("airspeed;");
         Serial.print(airspeed_filtered);
-        Serial.print(";\n");
+        Serial.print(",\n");
         }
     }
   }
@@ -563,30 +563,30 @@ if(baseline_motor_signal <= 1000){
   // Serial.println(airspeed);
 
   // Debugging info
-  Serial.print("setpoint: ");
+  //Serial.print("setpoint: ");
   Serial.print(setpoint);
-  Serial.print(";\t");
-  Serial.print("airspeed: ");
+  Serial.print(",\t");
+  //Serial.print("airspeed: ");
   Serial.print(airspeed);
-  Serial.print(";\t");
-  Serial.print("error: ");
+  Serial.print(",\t");
+ // Serial.print("error: ");
   Serial.print(error);
-  Serial.print(";\t");
-  Serial.print("Pout: ");
+  Serial.print(",\t");
+ // Serial.print("Pout: ");
   Serial.print(Pout);
-  Serial.print(";\t");
-  Serial.print("Iout: ");
+  Serial.print(",\t");
+ // Serial.print("Iout: ");
   Serial.print(Iout);
-  Serial.print(";\t");
-  Serial.print("Dout: ");
+  Serial.print(",\t");
+ // Serial.print("Dout: ");
   Serial.print(Dout);
-  Serial.print(";\t");
-  Serial.print("Output: ");
+  Serial.print(",\t");
+//  Serial.print("Output: ");
   Serial.print(output);
-  Serial.print(";\t");
-  Serial.print("Baseline: ");
+  Serial.print(",\t");
+ // Serial.print("Baseline: ");
   Serial.print(baseline_motor_signal);
-  Serial.print(";\n");
+  Serial.print(",\n");
 
 
   // Command motors with the final output
