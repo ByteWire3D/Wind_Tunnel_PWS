@@ -1,8 +1,4 @@
-﻿#!,Workbook:,Custom,Custom
-#!,Deze gegevens afspelen: open het oorspronkelijke Excel-werkmapbestand, klik op de knop *Gegevensbestand importeren* op het lint *Data Streamer* en navigeer naar dit bestand.
-#!,Ga naar http://aka.ms/hackingstem/ voor meer informatie
-killswitch pressed!!! new status: 1
-other data recieved: arm
+
 pid find speed,	90990,	0.78,	1005.00,	2.84,	2.06,	57.72,	0.01,	1585.26,	1000.25
 pid find speed,	91040,	0.78,	1010.00,	2.84,	2.06,	57.86,	0.02,	3.82,	1000.74
 pid find speed,	91090,	0.77,	1015.00,	2.84,	2.07,	58.00,	0.03,	3.70,	1001.45
