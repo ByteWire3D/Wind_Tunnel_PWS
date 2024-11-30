@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h> // software serial library
 #include <ESP32Servo.h>
 
 float rev_airspeed;
