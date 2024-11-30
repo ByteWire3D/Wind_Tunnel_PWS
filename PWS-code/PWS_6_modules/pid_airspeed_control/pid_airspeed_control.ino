@@ -270,7 +270,7 @@ if(!keep_speed){
     
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
       wait_count++;
-      if(windspeedList[set] > 10){
+      if(windspeedList[set] > 10 && set == 0){
          if(wait_count >= 600){
         calculate_motor_speed(error, output);
       } 
