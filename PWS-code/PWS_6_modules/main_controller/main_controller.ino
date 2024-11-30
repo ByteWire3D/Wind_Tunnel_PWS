@@ -484,6 +484,7 @@ if (kill_switch_status == HIGH) { // Test active
     system_status = 1;
     //Serial.println("System on, running the test --->");
 if(!test_begin){
+                 delay(1000);
                  Serial.print("Data Flag,");
   
                  Serial.print("Time, ");
@@ -502,7 +503,29 @@ if(!test_begin){
         
                  Serial.print("wattage; ");
             
-                 Serial.println("mah_used, ");
+                 Serial.println("mah_used ");
+  
+                 delay(200);
+  
+                 Serial.print("Data Flag,");
+  
+                 Serial.print("Time, ");
+              
+                 Serial.print("setpoint, ");
+    
+                 Serial.print("lift, ");
+        
+                 Serial.print("drag, ");
+          
+                 Serial.print("pitch, ");
+      
+                 Serial.print("ampere, ");
+               
+                 Serial.print("voltage, ");
+        
+                 Serial.print("wattage; ");
+            
+                 Serial.println("mah_used ");
                  test_begin = true;
 }
     for (int i = 0; i < total_steps; i++) {
