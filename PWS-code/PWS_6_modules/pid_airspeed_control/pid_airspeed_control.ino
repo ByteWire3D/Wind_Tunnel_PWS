@@ -186,6 +186,7 @@ void loop() {
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
 if(!test_begin){
+  delay(1000);
                  Serial.print("Data Flag,");
   
                  Serial.print("Time, ");
@@ -204,7 +205,28 @@ if(!test_begin){
       
                  Serial.print("D out, ");
                
-                 Serial.println("Baseline Signal, ");
+                 Serial.println("Baseline Signal ");
+delay(200);
+          Serial.print("Data Flag,");
+  
+                 Serial.print("Time, ");
+              
+                 Serial.print("Airspeed, ");
+    
+                 Serial.print("Output, ");
+                
+                 Serial.print("Setpoint, ");
+        
+                 Serial.print("Error, ");
+   
+                 Serial.print("P out, ");
+          
+                 Serial.print("I out, ");
+      
+                 Serial.print("D out, ");
+               
+                 Serial.println("Baseline Signal ");
+  
                  test_begin = true;
 }
     setpoint = windspeedList[set];
