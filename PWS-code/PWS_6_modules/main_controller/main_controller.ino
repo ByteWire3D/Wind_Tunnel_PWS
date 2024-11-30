@@ -552,6 +552,12 @@ if(!test_begin){
         }
 
         prevMillisTest = millis();
+        if(setpoint > 10 && i == 0){
+          pid_wait_Duration = 50000;
+        }
+        else{
+          pid_wait_Duration = 20000;
+        }
         while (millis() - prevMillisTest <= pid_wait_Duration) {
             if (kill_switch_status == LOW) break;
 
