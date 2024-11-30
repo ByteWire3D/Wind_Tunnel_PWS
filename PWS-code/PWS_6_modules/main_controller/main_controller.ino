@@ -235,7 +235,7 @@ unsigned long prevMillisUpdate = 0;
 unsigned long prevMillisDisplay = 0;
 
 const unsigned long updateInterval = 200; // 200 ms update interval
-unsigned long pid_wait_Duration = 20000; // 7500 ms per test step
+unsigned long pid_wait_Duration = 20000; // 7500 ms per test step // not constant because it needs to change
 
 
 template<typename T>
