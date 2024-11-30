@@ -186,7 +186,7 @@ void loop() {
   if (system_status == HIGH && main_controller_status == HIGH) {
     digitalWrite(led_pin, HIGH);
 if(!test_begin){
-  delay(1000);
+                 delay(1000);
                  Serial.print("Data Flag,");
   
                  Serial.print("Time, ");
@@ -206,8 +206,10 @@ if(!test_begin){
                  Serial.print("D out, ");
                
                  Serial.println("Baseline Signal ");
-delay(200);
-          Serial.print("Data Flag,");
+  
+                 delay(200);
+  
+                 Serial.print("Data Flag,");
   
                  Serial.print("Time, ");
               
