@@ -270,6 +270,20 @@ if(!keep_speed){
     
       moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
       wait_count++;
+      if(windspeedList[set] > 10){
+         if(wait_count >= 600){
+        calculate_motor_speed(error, output);
+      } 
+      
+      if(wait_count >= 1000){
+        keep_speed = true;
+        wait_count = 0;
+        sum_count = 0;
+        avrg_output = 0;
+      } 
+      }
+
+      else{
       if(wait_count >= 200){
         calculate_motor_speed(error, output);
       } 
@@ -280,6 +294,7 @@ if(!keep_speed){
         sum_count = 0;
         avrg_output = 0;
       } 
+    }
     }
     }
     if(keep_speed){
@@ -602,9 +617,15 @@ void moving_baseline_pid(float airspeed, float setpoint) {
 if(output <= 1000){
   output = 1000;
 }
+  if(output >= 2000){
+  output = 2000;
+}
 
 if(baseline_motor_signal <= 1000){
   baseline_motor_signal = 1000;
+}
+ if(baseline_motor_signal >= 2000){
+  baseline_motor_signal = 2000;
 }
   // Update previous error and previous output
   previousError = error;
