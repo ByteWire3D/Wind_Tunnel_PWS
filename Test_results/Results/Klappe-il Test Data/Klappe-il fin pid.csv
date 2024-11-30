@@ -1,10 +1,4 @@
 ﻿
-C:\Users\leonf\Documents>cd C:\Users\leonf\Documents
-
-C:\Users\leonf\Documents>python format_data.py
-#!,Workbook:,Custom,Custom
-#!,To play this data back: Open the original Excel workbook file then click the *Import Data File* button in the *Data Streamer* ribbon and navigate to this file.
-#!,For more information visit http://aka.ms/hackingstem/
 pid_loop-hz:
 20
 maxDelta:
