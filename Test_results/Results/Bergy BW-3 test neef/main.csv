@@ -29,7 +29,6 @@ entering loop
 killswitch pressed!!! new status: 1
 Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
 Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
-
 Waiting for PID,        85437,  2.84,   -1.97,  0.42,   -0.33,  0.06,   12.54,  0.70,   2.84
 Waiting for PID,        85637,  2.84,   -2.03,  0.40,   -0.33,  0.11,   12.54,  2.78,   2.88
 Waiting for PID,        85837,  2.84,   -2.12,  0.38,   -0.33,  0.08,   12.54,  1.04,   2.98
