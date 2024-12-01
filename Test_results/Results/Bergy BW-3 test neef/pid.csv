@@ -24,7 +24,7 @@ killswitch pressed!!! new status: 1
 Data Flag,Time, Airspeed, Output, Setpoint, Error, P out, I out, D out, Baseline Signal
 Data Flag,Time, Airspeed, Output, Setpoint, Error, P out, I out, D out, Baseline Signal
 other data recieved: arm
-pid find speed, 77215,  1.22,   1005.00,        2.84,   1.62,   45.32,  0.01,   1244.57,        1000.25
+pid find speed, 77215,  1.22,   1005.00,        2.84,   1.62,   45.32,  0.01,   1244.57, 1000.25
 pid find speed, 77264,  1.22,   1010.00,        2.84,   1.62,   45.30,  0.01,   -0.49,  1000.74
 pid find speed, 77314,  1.22,   1015.00,        2.84,   1.62,   45.28,  0.02,   -0.48,  1001.45
 pid find speed, 77364,  1.23,   1020.00,        2.84,   1.61,   45.26,  0.03,   -0.57,  1002.38
