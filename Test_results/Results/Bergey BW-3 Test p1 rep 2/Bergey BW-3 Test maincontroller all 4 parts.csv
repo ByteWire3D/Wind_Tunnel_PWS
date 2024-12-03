@@ -1,30 +1,6 @@
 ﻿
-
-Test Datum: 27.11.2024
-Windspeed recieved:2.84
-4.83
-6.82
-8.80
-Acknowledgment received.
-Acknowledgment received.
-All handshakes complete. Waiting for data...
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-sending armed command
-entering loop
-killswitch pressed!!! new status: 1
-Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
-Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
-
+#Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
+#Data Flag,Time, setpoint, lift, drag, pitch, ampere, voltage, wattage; mah_used
 Waiting for PID,        53018,  2.84,   -2.10,  -0.82,  -0.33,  0.06,   12.54,  0.70,   39.37
 Waiting for PID,        53218,  2.84,   -2.14,  -0.82,  -0.33,  0.15,   12.54,  3.83,   40.02,
 Waiting for PID,        53418,  2.84,   -2.18,  -0.83,  -0.33,  0.08,   12.54,  1.04,   40.66
