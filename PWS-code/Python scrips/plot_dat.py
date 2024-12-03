@@ -5,42 +5,38 @@ import matplotlib.pyplot as plt
 air_density = 1.225  # kg/m^3 (at sea level)
 reference_area = 80*100 /1000000  # m^2 (example value, adjust to your model)
 
-# File path to your data file
-data_file = "Bergey BW-3 Test maincontroller all 4 parts.csv"
+data = """ """
 
-# Initialize lists for storing data
 angles = []  # Angle of attack (pitch)
 cl_values = []  # Lift coefficient
 cd_values = []  # Drag coefficient
 
-# Read data from the file
-with open(data_file, 'r') as file:
-    reader = csv.reader(file)
-    for row in reader:
-        # Skip header or non-data rows
-        if "Data Flag" in row[0] or "Waiting for PID" in row[0]:
-            continue
+for line in data.strip().split("\n"):
+    # Skip the header or non-data rows
+    if "Data Flag" in line or "Waiting for PID" in line:
+        continue
+    
+    # Split the line into columns
+    try:
+        columns = line.split(",")
+        airspeed = float(colums[2])
+        pitch = float(columns[5])  # Angle of attack in degrees
+        lift = float(columns[3])  # Lift force in N
+        drag = float(columns[4])  # Drag force in N
         
-        # Extract relevant data
-        try:
-            pitch = float(row[5])  # Angle of attack in degrees
-            lift = float(row[3])  # Lift force in N
-            drag = float(row[4])  # Drag force in N
-            airspeed = float(row[2])
-
-            lift = lift * 9.81 *0.0001
-            drag = drag *9.81 *0.0001
-            # Compute coefficients
-            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
-            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
-            
-            # Store values
-            angles.append(pitch)
-            cl_values.append(cl)
-            cd_values.append(cd)
-        except (ValueError, IndexError):
-            # Skip lines with missing or invalid data
-            continue
+        lift = lift * 9.81 *0.0001
+        drag = drag *9.81 *0.0001
+        # Compute coefficients
+        cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+        cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+        # Store values
+        angles.append(pitch)
+        cl_values.append(cl)
+        cd_values.append(cd)
+    except (ValueError, IndexError):
+        # Skip lines with missing or invalid data
+        continue
 
 # Plotting
 # 1. C_L vs Angle of Attack
