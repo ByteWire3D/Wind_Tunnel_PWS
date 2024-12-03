@@ -1,4 +1,3 @@
-import csv
 import matplotlib.pyplot as plt
 
 # Constants (modify these based on your setup)
