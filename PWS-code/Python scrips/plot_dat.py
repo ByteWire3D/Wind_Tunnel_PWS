@@ -1313,6 +1313,7 @@ Testing,        314818, 8.80,   311.86, 305.48, 42.75,  15.51,  11.30,  175.19, 
 angles = []  # Angle of attack (pitch)
 cl_values = []  # Lift coefficient
 cd_values = []  # Drag coefficient
+clcd_values = [] 
 
 for line in data.strip().split("\n"):
     # Skip the header or non-data rows
@@ -1322,7 +1323,9 @@ for line in data.strip().split("\n"):
     # Split the line into columns
     try:
         columns = line.split(",")
-        airspeed = float(colums[2])
+        airspeed = float(columns[2])
+        if(airspeed == 2.84 or airspeed == 4.83 or airspeed == 6.82):
+            continue
         pitch = float(columns[5])  # Angle of attack in degrees
         lift = float(columns[3])  # Lift force in N
         drag = float(columns[4])  # Drag force in N
@@ -1332,11 +1335,14 @@ for line in data.strip().split("\n"):
         # Compute coefficients
         cl = 2 * lift / (air_density * airspeed**2 * reference_area)
         cd = 2 * drag / (air_density * airspeed**2 * reference_area)
-        
+        if(cl != 0 and cd !=0):
+            cl_cd = cl / cd 
         # Store values
+        
         angles.append(pitch)
         cl_values.append(cl)
         cd_values.append(cd)
+        clcd_values.append(cl_cd)
     except (ValueError, IndexError):
         # Skip lines with missing or invalid data
         continue
@@ -1366,6 +1372,14 @@ plt.plot(cd_values, cl_values, label='C_L vs C_D', marker='x', color='green')
 plt.xlabel('Drag Coefficient (C_D)')
 plt.ylabel('Lift Coefficient (C_L)')
 plt.title('Aerodynamic Polar: C_L vs C_D')
+plt.grid(True)
+plt.legend()
+
+plt.figure()
+plt.plot(angles, clcd_values , label='C_L/ C_D vs alpha', marker='x', color='green')
+plt.xlabel('angels (a)')
+plt.ylabel('Cl / Cd')
+plt.title('Aerodynamic Polar: C_L/ C_D vs Alpha')
 plt.grid(True)
 plt.legend()
 
