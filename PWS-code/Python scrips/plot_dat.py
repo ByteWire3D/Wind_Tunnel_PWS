@@ -1311,10 +1311,30 @@ Testing,        314818, 8.80,   311.86, 305.48, 42.75,  15.51,  11.30,  175.19, 
 """
 
 angles = []  # Angle of attack (pitch)
-cl_values = []  # Lift coefficient
-cd_values = []  # Drag coefficient
-clcd_values = [] 
 
+cl_values_284 = []  # Lift coefficient
+cd_values_284 = []  # Drag coefficient
+clcd_values_284 = [] #lift co / drag co 
+
+cl_values_483 = []  # Lift coefficient
+cd_values_483 = []  # Drag coefficient
+clcd_values_483 = [] #lift co / drag co 
+
+cl_values_682 = []  # Lift coefficient
+cd_values_682 = []  # Drag coefficient
+clcd_values_682 = [] #lift co / drag co 
+
+cl_values_880 = []  # Lift coefficient
+cd_values_880 = []  # Drag coefficient
+clcd_values_880 = [] #lift co / drag co 
+
+cl_values_1079 = []  # Lift coefficient
+cd_values_1079 = []  # Drag coefficient
+clcd_values_1079 = [] #lift co / drag co 
+
+cl_values_1278 = []  # Lift coefficient
+cd_values_1278 = []  # Drag coefficient
+clcd_values_1278 = [] #lift co / drag co 
 for line in data.strip().split("\n"):
     # Skip the header or non-data rows
     if "Data Flag" in line or "Waiting for PID" in line:
@@ -1324,25 +1344,152 @@ for line in data.strip().split("\n"):
     try:
         columns = line.split(",")
         airspeed = float(columns[2])
-        if(airspeed == 2.84 or airspeed == 4.83 or airspeed == 6.82):
-            continue
-        pitch = float(columns[5])  # Angle of attack in degrees
-        lift = float(columns[3])  # Lift force in N
-        drag = float(columns[4])  # Drag force in N
+        if(airspeed == 2.84):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
         
-        lift = lift * 9.81 *0.0001
-        drag = drag *9.81 *0.0001
-        # Compute coefficients
-        cl = 2 * lift / (air_density * airspeed**2 * reference_area)
-        cd = 2 * drag / (air_density * airspeed**2 * reference_area)
-        if(cl != 0 and cd !=0):
-            cl_cd = cl / cd 
-        # Store values
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
         
-        angles.append(pitch)
-        cl_values.append(cl)
-        cd_values.append(cd)
-        clcd_values.append(cl_cd)
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_284.append(cl)
+            cd_values_284.append(cd)
+            clcd_values_284.append(cl_cd)
+        elif(airspeed == 4.83):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
+        
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_483.append(cl)
+            cd_values_483.append(cd)
+            clcd_values_483.append(cl_cd)
+        elif(airspeed == 6.82):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
+        
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_682.append(cl)
+            cd_values_682.append(cd)
+            clcd_values_682.append(cl_cd)
+        elif(airspeed == 8.80):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
+        
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_880.append(cl)
+            cd_values_880.append(cd)
+            clcd_values_880.append(cl_cd)
+        elif(airspeed == 10.79):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
+        
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_1079.append(cl)
+            cd_values_1079.append(cd)
+            clcd_values_1079.append(cl_cd)  
+        elif(airspeed == 12.78):
+            pitch = float(columns[5])  # Angle of attack in degrees
+            lift = float(columns[3])  # Lift force in N
+            drag = float(columns[4])  # Drag force in N
+        
+            lift = lift * 9.81 *0.0001
+            drag = drag *9.81 *0.0001
+            # Compute coefficients
+            cl = 2 * lift / (air_density * airspeed**2 * reference_area)
+            cd = 2 * drag / (air_density * airspeed**2 * reference_area)
+        
+            if(cl == 0):
+                cl =  cl_values[len(cl_values)-1] + (cl_values[len(cl_values)-2] - cl_values[len(cl_values)-1])
+          
+            if(cd == 0):
+                cd =  cd_values[len(cd_values)-1] + (cd_values[len(cd_values)-2] - cd_values[len(cd_values)-1])
+            if(cl != 0 and cd !=0):
+                cl_cd = cl / cd 
+            # Store values
+        
+            angles.append(pitch)
+            cl_values_1278.append(cl)
+            cd_values_1278.append(cd)
+            clcd_values_1278.append(cl_cd)   
+        else:
+           continue
     except (ValueError, IndexError):
         # Skip lines with missing or invalid data
         continue
@@ -1376,7 +1523,7 @@ plt.grid(True)
 plt.legend()
 
 plt.figure()
-plt.plot(angles, clcd_values , label='C_L/ C_D vs alpha', marker='x', color='green')
+plt.plot(angles, clcd_values , label='C_L/ C_D vs alpha', marker='x', color='red')
 plt.xlabel('angels (a)')
 plt.ylabel('Cl / Cd')
 plt.title('Aerodynamic Polar: C_L/ C_D vs Alpha')
