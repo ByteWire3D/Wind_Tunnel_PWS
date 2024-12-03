@@ -684,6 +684,33 @@ cl_values_1278 = []  # Lift coefficient
 cd_values_1278 = []  # Drag coefficient
 clcd_values_1278 = [] #lift co / drag co 
 
+drag_data = []
+for line in data.strip().split("\n"):
+    # Skip lines that contain specific flags
+    if "Data Flag" in line or "Waiting for PID" in line:
+        continue
+    
+    try: 
+        # Split the line by commas and extract the drag value
+        columns = line.split(",")
+        drag = float(columns[4]) * 9.81 * 0.0001  # Drag force in N (converted)
+        
+        # Store the drag value in the list
+        drag_data.append(drag)
+    
+    except ValueError:
+        # Handle any parsing errors (e.g., missing or corrupted data)
+        continue
+
+# Step 1: Find the smallest value in the drag data
+min_val = min(drag_data)
+
+# Step 2: Calculate the offset (inverse of the smallest value)
+offset = -min_val + 0.01
+
+# Step 3: Apply the offset to the entire drag data list
+#corrected_drag_data = [drag + offset for drag in drag_data]
+
 for line in data.strip().split("\n"):
     if "Data Flag" in line or "Waiting for PID" in line:
         continue
@@ -693,7 +720,7 @@ for line in data.strip().split("\n"):
         airspeed = float(columns[2])
         pitch = float(columns[5])  # Angle of attack in degrees
         lift = float(columns[3]) * 9.81 * 0.0001  # Lift force in N (converted)
-        drag = float(columns[4]) * 9.81 * 0.0001  # Drag force in N (converted)
+        drag = float(columns[4]) * 9.81 * 0.0001 + offset  # Drag force in N (converted) 
 
         # Compute coefficients
         cl = 2 * lift / (air_density * airspeed**2 * reference_area)
