@@ -81,7 +81,7 @@ struct Config_data {
   String test_fileName;
   String speed;
   String angle;
-  String time_during_test;
+  String time_during_test; //ga dit gebruiken om onderschijt te maken tussen allerlei conditions.
   String test_datum;
   float windspeedList[10];
 };
@@ -483,7 +483,7 @@ if (kill_switch_status == HIGH) { // Test active
     mode = 2; // "testing active"
     system_status = 1;
     //Serial.println("System on, running the test --->");
-if(!test_begin){
+    if(!test_begin){
                  delay(1000);
                  Serial.print("Data Flag,");
   
@@ -527,7 +527,7 @@ if(!test_begin){
             
                  Serial.println("mah_used ");
                  test_begin = true;
-}
+    }
     for (int i = 0; i < total_steps; i++) {
         setpoint = windspeedList[i];
         if (kill_switch_status == LOW) break;
@@ -540,7 +540,7 @@ if(!test_begin){
 
         // Adjust motor until the angle is within tolerance
         while (abs(start_angle - recieved_angle) > 0.5) {
-            command_angle_motor(0);
+            command_angle_motor(-1);
             recieved_angle = read_target_from_pwm();
           //  Serial.print("Received angle:");
             //Serial.println(recieved_angle);
@@ -705,6 +705,13 @@ if(!test_begin){
 
     // Test is done, set all values to 0 and turn off
     test_is_done();
+    if(time_during_test == "show"){
+       //run a preprogrammed show
+    }
+    if(time_during_test == "input"){
+      // keep the angle submitted
+      // keep the speed submitted
+    }
 }
 
 if (kill_switch_status == LOW) { // Armed but not active
@@ -738,7 +745,7 @@ if (kill_switch_status == LOW) { // Armed but not active
 
 void test_is_done() {
   send_setpoint(pid_controller, -1);
-  command_angle_motor(0);
+  command_angle_motor(-1);
   kill_switch_status = LOW;
   count_display = 4;
   system_status = 0;
@@ -780,7 +787,7 @@ void send_measuring_device_conf_data() {
 
 void command_angle_motor(float angle) {
   angle *= 100;
-  unsigned long pulsewidth = map(angle, 0, 4500, 500, 2500);
+  unsigned long pulsewidth = map(angle, -100, 4500, 500, 2500);
   //Serial.println(pulsewidth);
   servo.writeMicroseconds(pulsewidth);
 }

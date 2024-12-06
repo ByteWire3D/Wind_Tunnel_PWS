@@ -86,6 +86,9 @@ void loop() {
     previousMillis = currentMillis;
     target = read_target_from_pwm();
 
+    if(target < -0.5){
+      find_endpoint();
+    }
     // get target position
     PID_motor(target);
 
@@ -145,14 +148,14 @@ float read_target_from_pwm() {
   unsigned long pulseWidth = pulseIn(20, HIGH);
   // pulseWidth = constrain(pulseWidth, 1000, 2000);
   // Map the pulse width to the target angle
-  float target = map(pulseWidth, 500, 2500, 0, 4500);
+  float target = map(pulseWidth, 500, 2500, -100, 4500);
   target /= 100;
  
   Serial.print("target recieved:");
   Serial.print(target);
   Serial.print("\t");
   Serial.println(pulseWidth);
-  target = constrain(target, 0, 45);
+  target = constrain(target, -1, 45);
   // prev_target = target;
   return target;
 }
@@ -262,7 +265,7 @@ void find_endpoint() {
     setMotor(1, 200, motor1, motor2);
     Serial.println("direction: 1");
     delay(10);
-    if (millis() - prevMillis >= 3000) {
+    if (millis() - prevMillis >= 2000) {
       prevMillis = millis();
       Serial.println("move other way -->");
       Serial.println("direction: -1");
