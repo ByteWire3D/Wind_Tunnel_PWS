@@ -1,4 +1,4 @@
-# Wind_Tunnel_PWS
+# Peregrine Falcon
 This a PWS of Faiaz Dindar and Leon Frederiks.
 
 The project consists of 6 modules:
