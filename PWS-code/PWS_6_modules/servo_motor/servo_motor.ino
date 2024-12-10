@@ -46,7 +46,7 @@ Servo angle_out;
 int pos_offset = 4;
 int subzero_offset;
 bool calibarted = false;
-
+bool stay = false;
 float prev_target = 0;
 void setup() {
   Serial.begin(115200);
@@ -78,14 +78,21 @@ void loop() {
   if (Serial.available()) {
     target = Serial.parseFloat();
     Serial.println(target);
+    if(target != 0){
+      stay = true;
+    }else{
+      stay = false;
+    }
     clearSerialBuffer();
   }
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 20) {  // 50hz loop rate
     previousMillis = currentMillis;
-    target = read_target_from_pwm();
-
+    if(!stay){
+      target = read_target_from_pwm();
+    }
+ 
     if(target < -0.5){
       find_endpoint();
     }
@@ -94,6 +101,7 @@ void loop() {
 
     send_angle_pwm(curr_angle);
   }
+
 
 //test code --->
   /*

@@ -126,7 +126,8 @@ float motor_speed;
 int sum_count = 0;
 float avrg_output = 0;
 bool test_begin = false;
-
+float serial_motor = 1000;
+bool show = false;
 void setup() {
   Serial.begin(115200);
   main_controller.begin(9600);
@@ -232,23 +233,48 @@ if(!test_begin){
                  test_begin = true;
 }
     setpoint = windspeedList[set];
-    /*
-    pid_controller_data data_send{
-      setpoint,
-      airspeed_filtered,
-      error,
-      output,
-      baseline_motor_signal,
-      Pout,
-      Iout,
-      Dout };
-    handleGetCommand(main_controller, data_send);
-*/
 handleGetCommand(main_controller); //, data_send
 if(!keep_speed){
       
     if (current_time - previous_time >= interval) {
       previous_time = millis();
+      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+      if(serial_motor != 1000){
+        Serial.print("Airspeed:");
+        Serial.print(airspeed_filtered)
+        Serial.print("\t");
+        Serial.print("Motor signal:");
+        Serial.print(serial_motor)
+        Serial.print("\n");
+        command_motors(serial_motor, false);
+      }
+      else if(show){
+         //first have it via pid an a low setpoint that works well, 4 m/s or smth
+        for(int i = 0; i < 800; i++){
+          setpoint = 4.00;
+          moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
+        }
+        // than cut one motor, an see the pid algorithme correcting for it
+        for(int j = 0; j < 1000; j++){
+          setpoint = 4.00;
+          moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one motor
+        }
+
+        //than go incrementally faster 100 per 20 sec or smthing
+        for(float k = 1300; k <2001; k+= 1,1666666){
+          command_motors(k, false); // go faster for 30 sec
+        }
+        
+        //than have a nice and gradual end, not instand, but nice and slow.
+        for(int s = 2000; s > 1150; s -= 12 ){
+          command_motors(s, false); // go faster for 30 sec
+        }
+        delay(1000);
+        command_motors(minPulseWidth);
+        show = false;
+
+      }
+      else{
       //Serial.println("system is on!-->>>>>");
       //Serial.println(setpoint);
 
@@ -258,17 +284,11 @@ if(!keep_speed){
      // Serial.print(airspeed);
       // Serial.println(",");
 
-      //float airspeed_kalman = calc_airspeed_kalman_filter();  // kalman
-
-      airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-      //airspeed_filtered = 1.2;
-     //  Serial.print("current_time, ");
-      
   
 
-      //command_motors(1200);
+      //command_motors(1200, false);
     
-      moving_baseline_pid(airspeed_filtered, windspeedList[set]);  // automatic baseline finder + normal pid
+      moving_baseline_pid(airspeed_filtered, windspeedList[set], false);  // automatic baseline finder + normal pid
       wait_count++;
       if(windspeedList[set] > 10 && set == 0){
          if(wait_count >= 600){
@@ -297,11 +317,12 @@ if(!keep_speed){
     }
     }
     }
+}
     if(keep_speed){
         if (current_time - previous_time >= 200) {
           airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       previous_time = millis();
-      command_motors(motor_speed);
+      command_motors(motor_speed, false);
           Serial.print("keep speed");
                Serial.print(",\t");
        // Serial.print("current_time; ");
@@ -331,18 +352,7 @@ if(!keep_speed){
      // Serial.println(",");
     //airspeed_filtered = 1.00;
         }
-/*
-    pid_controller_data data_send{
-      setpoint,
-      airspeed_filtered,
-      error,
-      output,
-      baseline_motor_signal,
-      Pout,
-      Iout,
-      Dout };
-    handleGetCommand(main_controller, data_send);
-*/
+
     // Serial.println(status);
     if (Serial.available()) {
       // Read the input as a string
@@ -352,12 +362,33 @@ if(!keep_speed){
       // Handle "set" command
       if (input.equalsIgnoreCase("set")) {
         setPIDValues();
-      } else if (input.equalsIgnoreCase("setpoint")) {
+      } else if (input.equalsIgnoreCase("show")) {
+        show = true;
+        Serial.println("The show is armed, waiting on trigger :)))");
+        delay(1000);
+      } 
+      else if (input.equalsIgnoreCase("setpoint")) {
         Serial.print("Enter new setpoint value: ");
         while (!Serial.available())
           ;                              // Wait for user input
         setpoint = Serial.parseFloat();  // Read float value from the serial monitor
         Serial.println(setpoint);
+        clearSerialBuffer(Serial);  // Clear any leftover characters
+        delay(200);
+      } else if (input.equalsIgnoreCase("motor")) {
+        Serial.print("Enter new motor signal: ");
+        while (!Serial.available())
+          ;                              // Wait for user input
+        serial_motor = Serial.parseFloat();  // Read float value from the serial monitor
+        if(serial_motor <= 1000 || serial_motor > 2000){
+          Serial.println("-!-");
+          Serial.println("wrong input input something higher than 1000 or smaller than 2000");
+          serial_motor = 1000;
+        }
+        else{
+          Serial.println(serial_motor);
+        }
+       
         clearSerialBuffer(Serial);  // Clear any leftover characters
         delay(200);
       }
@@ -558,7 +589,7 @@ float better_contrain(float value, float range_low, float range_high) {
   }
 }
 
-void moving_baseline_pid(float airspeed, float setpoint) {
+void moving_baseline_pid(float airspeed, float setpoint, bool cut) {
   // Calculate error
   error = setpoint - airspeed;
   if (abs(error) < 0.1) {
@@ -668,7 +699,7 @@ if(baseline_motor_signal <= 1000){
 
 
   // Command motors with the final output
-  command_motors(output);
+  command_motors(output, cut);
 }
 
 void airspeed_pid(float airspeed, float setpoint) {
@@ -739,17 +770,24 @@ void airspeed_pid(float airspeed, float setpoint) {
   }
 
   //command motors:
-  command_motors(output);
+  command_motors(output, false);
 }
 
 
-void command_motors(float output) {
-  motor_signal1 = output;
-  motor_signal2 = output;
+void command_motors(float output, bool cut) {
+  if(cut){
+    motor_signal1 = output;
+    motor1.writeMicroseconds(motor_signal1);
+    motor2.writeMicroseconds(minPulseWidth);
+  }
+  else{
+    motor_signal1 = output;
+    motor_signal2 = output;
 
 
-  motor1.writeMicroseconds(motor_signal1);
-  motor2.writeMicroseconds(motor_signal2);
+   motor1.writeMicroseconds(motor_signal1);
+   motor2.writeMicroseconds(motor_signal2);
+  }
 }
 
 
