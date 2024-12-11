@@ -288,7 +288,7 @@ if(!keep_speed){
         Serial.println("going faster for 30 sec");
         //than go incrementally faster for 30sec until 2000 
         float k = 1300;
-        while(k <2001){
+        while(k <1800){
             if(!system_status){
             break;
           }
@@ -303,13 +303,13 @@ if(!keep_speed){
         }
         Serial.println("motors at full speed:");
         for(int z = 5; z>0; z--){
-          command_motors(2000, false); // go faster for 30 sec
+          command_motors(1800, false); // go faster for 30 sec
           delay(1000);
           Serial.println(z);
         }
         Serial.println("stopping motors!!");
         //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
-        for(int s = 2000; s > 1150; s -= 12 ){
+        for(int s = 1800; s > 1150; s -= 12 ){
             if(!system_status){
             break;
           }
