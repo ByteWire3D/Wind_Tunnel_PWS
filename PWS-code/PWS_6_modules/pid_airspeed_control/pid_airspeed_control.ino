@@ -255,7 +255,7 @@ if(!keep_speed){
          Serial.print("setpoint: ");
          Serial.println(setpoint);
          int i = 0;
-        while(i <= 800){
+        while(i <= 500){
           if(!system_status){
             break;
           }
@@ -271,7 +271,7 @@ if(!keep_speed){
          Serial.println(setpoint);
          Serial.println("continuing pid for 1 motor --->");
          int j = 0;
-        while( j < 1000){
+        while( j < 600){
             if(!system_status){
             break;
           }
