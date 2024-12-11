@@ -366,6 +366,10 @@ if(!keep_speed){
         show = true;
         Serial.println("The show is armed, waiting on trigger :)))");
         delay(1000);
+      } else if (input.equalsIgnoreCase("noshow")) {
+        show = false;
+        Serial.println("The show is disarmed!");
+        delay(1000);
       } 
       else if (input.equalsIgnoreCase("setpoint")) {
         Serial.print("Enter new setpoint value: ");
