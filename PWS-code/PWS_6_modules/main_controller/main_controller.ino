@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h> 
+#include <SoftwareSerial.h>
 #include <ESP32Servo.h>
 
 float rev_airspeed;
@@ -81,7 +81,7 @@ struct Config_data {
   String test_fileName;
   String speed;
   String angle;
-  String time_during_test; //ga dit gebruiken om onderschijt te maken tussen allerlei conditions.
+  String time_during_test;  //ga dit gebruiken om onderschijt te maken tussen allerlei conditions.
   String test_datum;
   float windspeedList[10];
 };
@@ -234,8 +234,8 @@ unsigned long prevMillisTest = 0;
 unsigned long prevMillisUpdate = 0;
 unsigned long prevMillisDisplay = 0;
 
-const unsigned long updateInterval = 200; // 200 ms update interval
-unsigned long pid_wait_Duration = 20000; // 7500 ms per test step // not constant because it needs to change
+const unsigned long updateInterval = 200;  // 200 ms update interval
+unsigned long pid_wait_Duration = 20000;   // 7500 ms per test step // not constant because it needs to change
 
 bool show = false;
 
@@ -405,8 +405,8 @@ void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const 
   }
 
   //Serial.print("Failed to receive data from ");
- // Serial.print(deviceName);
- // Serial.println(" within the time limit.");
+  // Serial.print(deviceName);
+  // Serial.println(" within the time limit.");
 }
 bool test_begin = false;
 void setup() {
@@ -478,182 +478,180 @@ void setup() {
 }
 
 void loop() {
-// Add necessary state variables
+  // Add necessary state variables
 
-if (kill_switch_status == HIGH) { // Test active
-    mode = 2; // "testing active"
-    if(show){
+  if (kill_switch_status == HIGH) {  // Test active
+    mode = 2;                        // "testing active"
+    if (show) {
       command_angle_motor(0);
       delay(40000);
-      for(int i = 0; i < 46; i += 5){
+      for (int i = 0; i < 46; i += 5) {
         command_angle_motor(i);
         delay(1000);
       }
       delay(4000);
       command_angle_motor(0);
-    }
-  else{
+    } else {
 
-    //Serial.println("System on, running the test --->");
-    if(!test_begin){
-                 delay(1000);
-                 Serial.print("Data Flag,");
-  
-                 Serial.print("Time, ");
-              
-                 Serial.print("setpoint, ");
-    
-                 Serial.print("lift, ");
-        
-                 Serial.print("drag, ");
-          
-                 Serial.print("pitch, ");
-      
-                 Serial.print("ampere, ");
-               
-                 Serial.print("voltage, ");
-        
-                 Serial.print("wattage; ");
-            
-                 Serial.println("mah_used ");
-  
-                 delay(200);
-  
-                 Serial.print("Data Flag,");
-  
-                 Serial.print("Time, ");
-              
-                 Serial.print("setpoint, ");
-    
-                 Serial.print("lift, ");
-        
-                 Serial.print("drag, ");
-          
-                 Serial.print("pitch, ");
-      
-                 Serial.print("ampere, ");
-               
-                 Serial.print("voltage, ");
-        
-                 Serial.print("wattage; ");
-            
-                 Serial.println("mah_used ");
-                 test_begin = true;
-    }
-    for (int i = 0; i < total_steps; i++) {
+      //Serial.println("System on, running the test --->");
+      if (!test_begin) {
+        delay(1000);
+        Serial.print("Data Flag,");
+
+        Serial.print("Time, ");
+
+        Serial.print("setpoint, ");
+
+        Serial.print("lift, ");
+
+        Serial.print("drag, ");
+
+        Serial.print("pitch, ");
+
+        Serial.print("ampere, ");
+
+        Serial.print("voltage, ");
+
+        Serial.print("wattage; ");
+
+        Serial.println("mah_used ");
+
+        delay(200);
+
+        Serial.print("Data Flag,");
+
+        Serial.print("Time, ");
+
+        Serial.print("setpoint, ");
+
+        Serial.print("lift, ");
+
+        Serial.print("drag, ");
+
+        Serial.print("pitch, ");
+
+        Serial.print("ampere, ");
+
+        Serial.print("voltage, ");
+
+        Serial.print("wattage; ");
+
+        Serial.println("mah_used ");
+        test_begin = true;
+      }
+      for (int i = 0; i < total_steps; i++) {
         setpoint = windspeedList[i];
         if (kill_switch_status == LOW) break;
 
         send_setpoint(pid_controller, i);
-        
-       // Serial.println(setpoint);
+
+        // Serial.println(setpoint);
         recieved_angle = read_target_from_pwm();
         //Serial.println(recieved_angle);
 
         // Adjust motor until the angle is within tolerance
         while (abs(start_angle - recieved_angle) > 0.5) {
-            command_angle_motor(-1);
-            recieved_angle = read_target_from_pwm();
+          command_angle_motor(-1);
+          recieved_angle = read_target_from_pwm();
           //  Serial.print("Received angle:");
-            //Serial.println(recieved_angle);
-            if (millis() - prevMillisUpdate >= updateInterval) {
-                prevMillisUpdate = millis();
-                // Allow for other operations during angle adjustment
-                if (kill_switch_status == LOW) break;
-            }
+          //Serial.println(recieved_angle);
+          if (millis() - prevMillisUpdate >= updateInterval) {
+            prevMillisUpdate = millis();
+            // Allow for other operations during angle adjustment
+            if (kill_switch_status == LOW) break;
+          }
         }
 
         prevMillisTest = millis();
-        if(setpoint > 10 && i == 0){
+        if (setpoint > 10 && i == 0) {
           pid_wait_Duration = 50000;
-        }
-        else{
+        } else {
           pid_wait_Duration = 20000;
         }
         while (millis() - prevMillisTest <= pid_wait_Duration) {
+          if (kill_switch_status == LOW) break;
+
+          if (millis() - prevMillisUpdate >= updateInterval) {
+            prevMillisUpdate = millis();
             if (kill_switch_status == LOW) break;
 
-            if (millis() - prevMillisUpdate >= updateInterval) {
-                 prevMillisUpdate = millis();
-                if (kill_switch_status == LOW) break;
+            // Send and receive PID data
+            //sendCommand(pid_controller, "GET", "pid_controller");
+            // waitForData(pid_controller, pid_data, 90, "pid_controller");
 
-                 // Send and receive PID data
-                 //sendCommand(pid_controller, "GET", "pid_controller");
-                // waitForData(pid_controller, pid_data, 90, "pid_controller");
-                
 
-                 // Send and receive measuring device data
-                 sendCommand(meassuring_device, "GET", "meassuring_device");
-                 waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
+            // Send and receive measuring device data
+            sendCommand(meassuring_device, "GET", "meassuring_device");
+            waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
 
-                 command_angle_motor(0);
-                 pitch = read_target_from_pwm();
-                 Serial.print("Waiting for PID,");
-                 Serial.print("\t");
-                 // Serial.print("current_time, ");
-                 Serial.print(millis());
-                 Serial.print(",\t");
+            command_angle_motor(0);
+            pitch = read_target_from_pwm();
+            Serial.print("Waiting for PID,");
+            Serial.print("\t");
+            // Serial.print("current_time, ");
+            Serial.print(millis());
+            Serial.print(",\t");
 
-                // Serial.print("setpoint, ");
-                 Serial.print(setpoint);
-                 Serial.print(",\t");
+            // Serial.print("setpoint, ");
+            Serial.print(setpoint);
+            Serial.print(",\t");
 
-                 //Serial.print("lift, ");
-                 Serial.print(lift_loadcell);
-                 Serial.print(",\t");
+            //Serial.print("lift, ");
+            Serial.print(lift_loadcell);
+            Serial.print(",\t");
 
-                // Serial.print("drag; ");
-                 Serial.print(drag_loadcell);
-                 Serial.print(",\t");
+            // Serial.print("drag; ");
+            Serial.print(drag_loadcell);
+            Serial.print(",\t");
 
             //     Serial.print("pitch; ");
-                 Serial.print(pitch);
-                 Serial.print(",\t");
+            Serial.print(pitch);
+            Serial.print(",\t");
 
-                // Serial.print("ampere; ");
-                 Serial.print(ampere);
-                 Serial.print(",\t");
+            // Serial.print("ampere; ");
+            Serial.print(ampere);
+            Serial.print(",\t");
 
-                // Serial.print("voltage; ");
-                 Serial.print(voltage);
-                 Serial.print(",\t");
+            // Serial.print("voltage; ");
+            Serial.print(voltage);
+            Serial.print(",\t");
 
-                 //Serial.print("wattage; ");
-                 Serial.print(wattage);
-                 Serial.print(",\t");
+            //Serial.print("wattage; ");
+            Serial.print(wattage);
+            Serial.print(",\t");
 
-               //  Serial.print("mah_used; ");
-                 Serial.print(mah_used);
-                 Serial.print("\n");
+            //  Serial.print("mah_used; ");
+            Serial.print(mah_used);
+            Serial.print("\n");
 
-                // Update display data every 4 cycles
-                 if (count_display >= 4) {
-                   count_display = 0;
-                   send_display_data();
-                }
-                count_display++;
-
-                // Log data
-               // send_datalogger();
+            // Update display data every 4 cycles
+            if (count_display >= 4) {
+              count_display = 0;
+              send_display_data();
             }
+            count_display++;
+
+            // Log data
+            // send_datalogger();
+          }
         }
 
         // Perform angle sweep
         static float currentAngle = start_angle;
         while (currentAngle <= end_angle) {
-            if (kill_switch_status == LOW) break;
+          if (kill_switch_status == LOW) break;
 
 
-            // Wait for the next step
-            if (millis() - prevMillisUpdate >= updateInterval) {
-                prevMillisUpdate = millis();
+          // Wait for the next step
+          if (millis() - prevMillisUpdate >= updateInterval) {
+            prevMillisUpdate = millis();
 
-               // Serial.print("Angle:");
-                //Serial.println(currentAngle);
+            // Serial.print("Angle:");
+            //Serial.println(currentAngle);
 
             // Perform step actions
-           // sendCommand(pid_controller, "GET", "pid_controller");
-          //  waitForData(pid_controller, pid_data, 90, "pid_controller");
+            // sendCommand(pid_controller, "GET", "pid_controller");
+            //  waitForData(pid_controller, pid_data, 90, "pid_controller");
 
             sendCommand(meassuring_device, "GET", "meassuring_device");
             waitForData(meassuring_device, meassurment_data, 90, "meassuring_device");
@@ -661,109 +659,108 @@ if (kill_switch_status == HIGH) { // Test active
             command_angle_motor(currentAngle);
             pitch = read_target_from_pwm();
 
-                 Serial.print("Testing,");
-                 Serial.print("\t");
-                 // Serial.print("current_time, ");
-                 Serial.print(millis());
-                 Serial.print(",\t");
+            Serial.print("Testing,");
+            Serial.print("\t");
+            // Serial.print("current_time, ");
+            Serial.print(millis());
+            Serial.print(",\t");
 
-                // Serial.print("setpoint, ");
-                 Serial.print(setpoint);
-                 Serial.print(",\t");
+            // Serial.print("setpoint, ");
+            Serial.print(setpoint);
+            Serial.print(",\t");
 
-                 //Serial.print("lift, ");
-                 Serial.print(lift_loadcell);
-                 Serial.print(",\t");
+            //Serial.print("lift, ");
+            Serial.print(lift_loadcell);
+            Serial.print(",\t");
 
-                // Serial.print("drag; ");
-                 Serial.print(drag_loadcell);
-                 Serial.print(",\t");
+            // Serial.print("drag; ");
+            Serial.print(drag_loadcell);
+            Serial.print(",\t");
 
             //     Serial.print("pitch; ");
-                 Serial.print(pitch);
-                 Serial.print(",\t");
+            Serial.print(pitch);
+            Serial.print(",\t");
 
-                // Serial.print("ampere; ");
-                 Serial.print(ampere);
-                 Serial.print(",\t");
+            // Serial.print("ampere; ");
+            Serial.print(ampere);
+            Serial.print(",\t");
 
-                // Serial.print("voltage; ");
-                 Serial.print(voltage);
-                 Serial.print(",\t");
+            // Serial.print("voltage; ");
+            Serial.print(voltage);
+            Serial.print(",\t");
 
-                 //Serial.print("wattage; ");
-                 Serial.print(wattage);
-                 Serial.print(",\t");
+            //Serial.print("wattage; ");
+            Serial.print(wattage);
+            Serial.print(",\t");
 
-               //  Serial.print("mah_used; ");
-                 Serial.print(mah_used);
-                 Serial.print("\n");
+            //  Serial.print("mah_used; ");
+            Serial.print(mah_used);
+            Serial.print("\n");
 
-                // Update display data every 4 cycles
-                 if (count_display >= 4) {
-                   count_display = 0;
-                   send_display_data();
-                }
-                count_display++;
-            // Log data
-          //  send_datalogger();
-
-              currentAngle += 0.2; // Increment angle after delay
+            // Update display data every 4 cycles
+            if (count_display >= 4) {
+              count_display = 0;
+              send_display_data();
             }
+            count_display++;
+            // Log data
+            //  send_datalogger();
+
+            currentAngle += 0.2;  // Increment angle after delay
+          }
         }
 
-        currentAngle = start_angle; // Reset angle for the next step
+        currentAngle = start_angle;  // Reset angle for the next step
+      }
+
+      // Test is done, set all values to 0 and turn off
+      test_is_done();
     }
-   
-    // Test is done, set all values to 0 and turn off
-    test_is_done();
-    }
+  }
 }
 
-if (kill_switch_status == LOW) { // Armed but not active
-    mode = 3; // "armed (waiting)"
-    system_status = 0;
+if (kill_switch_status == LOW) {  // Armed but not active
+  mode = 3;                       // "armed (waiting)"
+  system_status = 0;
 
-    if (millis() - prevMillisUpdate >= updateInterval) {
-        prevMillisUpdate = millis();
+  if (millis() - prevMillisUpdate >= updateInterval) {
+    prevMillisUpdate = millis();
 
-        // Send and receive PID data
-       // sendCommand(pid_controller, "GET", "pid_controller");
-        //waitForData(pid_controller, pid_data, 100, "pid_controller");
+    // Send and receive PID data
+    // sendCommand(pid_controller, "GET", "pid_controller");
+    //waitForData(pid_controller, pid_data, 100, "pid_controller");
 
-        // Send and receive measuring device data
-        sendCommand(meassuring_device, "GET", "meassuring_device");
-        waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
+    // Send and receive measuring device data
+    sendCommand(meassuring_device, "GET", "meassuring_device");
+    waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
 
-        command_angle_motor(0);
+    command_angle_motor(0);
 
-        // Update display data every 4 cycles
-       // if (count_display >= 4) {
-        //    count_display = 0;
-        //    send_display_data();
-        //    Serial.println("System off");
-        //}
-        //count_display++;
+    // Update display data every 4 cycles
+    // if (count_display >= 4) {
+    //    count_display = 0;
+    //    send_display_data();
+    //    Serial.println("System off");
+    //}
+    //count_display++;
 
-        if (Serial.available()) {
-          // Read the input as a string
-          String input = Serial.readStringUntil('\n');
-          input.trim();  // Remove extra spaces and newlines
+    if (Serial.available()) {
+      // Read the input as a string
+      String input = Serial.readStringUntil('\n');
+      input.trim();  // Remove extra spaces and newlines
 
-          // Handle "set" command
-           if (input.equalsIgnoreCase("show")) {
-            show = true;
-            Serial.println("The show is armed, waiting on trigger :)))");
-            delay(1000);
-          } else if (input.equalsIgnoreCase("noshow")) {
-            show = false;
-            Serial.println("The show is disarmed!");
-            delay(1000);
-          } 
-
+      // Handle "set" command
+      if (input.equalsIgnoreCase("show")) {
+        show = true;
+        Serial.println("The show is armed, waiting on trigger :)))");
+        delay(1000);
+      } else if (input.equalsIgnoreCase("noshow")) {
+        show = false;
+        Serial.println("The show is disarmed!");
+        delay(1000);
+      }
     }
-}
-
+  }
 }
 }
 
@@ -792,7 +789,7 @@ void send_datalogger() {
     voltage,
     wattage,
     mah_used,
-    
+
     looptime,
     loop_number
   };
@@ -820,7 +817,7 @@ float read_target_from_pwm() {
   // Read the pulse width in microseconds
   unsigned long pulseWidth = pulseIn(angle_pin, HIGH);
   //Serial.print(pulseWidth);
- // Serial.print("\t");
+  // Serial.print("\t");
 
   float angle = map(pulseWidth, 100, 500, 0, 4500);
   angle /= 100;
@@ -886,8 +883,8 @@ void send_display_data() {
     d_gain
   };
   */
-   time_seconds = millis() / 1000;
-   Display_data datatosend{
+  time_seconds = millis() / 1000;
+  Display_data datatosend{
     setpoint,
     lift_loadcell,
     drag_loadcell,
@@ -1002,7 +999,7 @@ void sendAcknowledgment(Stream &serial, const char *ackMessage) {
 bool performHandshake(Stream &serial, unsigned long timeout_ms) {
   unsigned long start_time = millis();
 
-   clearSerialBuffer(serial);  // Clear the buffer before starting handshake
+  clearSerialBuffer(serial);  // Clear the buffer before starting handshake
 
   // Wait for the ping message within the specified timeout
   while (millis() - start_time < timeout_ms) {
