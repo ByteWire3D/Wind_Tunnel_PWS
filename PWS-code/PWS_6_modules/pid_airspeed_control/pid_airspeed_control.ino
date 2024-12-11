@@ -257,7 +257,7 @@ if(!keep_speed){
          int i = 0;
         while(i <= 500){
           if(!system_status){
-            break;
+            return;
           }
           if (millis() - previous_time >= interval) {
              previous_time = millis();
@@ -273,7 +273,7 @@ if(!keep_speed){
          int j = 0;
         while( j < 600){
             if(!system_status){
-            break;
+            return;
           }
           if (millis() - previous_time >= interval) {
             previous_time = millis();
@@ -290,12 +290,14 @@ if(!keep_speed){
         float k = 1300;
         while(k <1800){
             if(!system_status){
-            break;
+            return;
           }
            if (millis() - previous_time >= interval) {
              previous_time = millis();
              airspeed_filtered = filtered_airspeed();  // kalman + moving filter
              command_motors(k, false); // go faster for 30 sec
+             Serial.print(k);
+             Serial.print("\t");
              Serial.print("airspeed: ");
              Serial.println(airspeed_filtered);
              k+= 1,1666666;
@@ -311,15 +313,17 @@ if(!keep_speed){
         //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
         for(int s = 1800; s > 1150; s -= 12 ){
             if(!system_status){
-            break;
+            return;
           }
           command_motors(s, false); // go faster for 30 sec
+          Serial.println(s);
           delay(50);
         }
         
         command_motors(minPulseWidth, false);
         show = false;
-         Serial.println("motors off! and show done! ");
+        system_status = false;
+        Serial.println("motors off! and show done! ");
  
 
       }
@@ -684,7 +688,7 @@ void moving_baseline_pid(float airspeed, float setpoint, bool cut) {
     // Output remains stable at the baseline
     output = baseline_motor_signal;
   } else {
-    // Outside the deadband, continue normal PID adjustments
+    // Outside the deadband, return normal PID adjustments
     is_in_deadband = false;
 
     // Gradually adjust the baseline towards the current output
@@ -782,7 +786,7 @@ void airspeed_pid(float airspeed, float setpoint) {
       // Output remains stable at the baseline
       output = aprox_motor_signal;
     } else {
-      // Outside the deadband, continue normal PID adjustments
+      // Outside the deadband, return normal PID adjustments
       is_in_deadband = false;
 
 
