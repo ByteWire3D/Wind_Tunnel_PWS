@@ -249,7 +249,7 @@ void loop() {
           command_motors(serial_motor, false);
         } else if (show) {
           //first have it via pid an a low setpoint that works well, 4 m/s or smth
-          setpoint = 4.00;
+          setpoint = 3.00;
           Serial.println("starting show");
           Serial.print("setpoint: ");
           Serial.println(setpoint);
@@ -291,7 +291,7 @@ void loop() {
           Serial.println("going faster for 30 sec");
           //than go incrementally faster for 30sec until 2000
           float k = 1300;
-          while (k < 1800) {
+          while (k < 2000) {
             if (!system_status) {
               motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
@@ -305,7 +305,7 @@ void loop() {
               Serial.print("\t");
               Serial.print("airspeed: ");
               Serial.println(airspeed_filtered);
-              k += 1, 1666666;
+              k += 3;
             }
           }
           Serial.println("motors at full speed:");
