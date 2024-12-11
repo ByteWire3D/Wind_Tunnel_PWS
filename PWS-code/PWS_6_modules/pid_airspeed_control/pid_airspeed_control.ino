@@ -244,7 +244,7 @@ if(!keep_speed){
         Serial.print(airspeed_filtered)
         Serial.print("\t");
         Serial.print("Motor signal:");
-        Serial.print(serial_motor)
+        Serial.print(serial_motor);
         Serial.print("\n");
         command_motors(serial_motor, false);
       }
