@@ -237,6 +237,7 @@ unsigned long prevMillisDisplay = 0;
 const unsigned long updateInterval = 200; // 200 ms update interval
 unsigned long pid_wait_Duration = 20000; // 7500 ms per test step // not constant because it needs to change
 
+bool show = false;
 
 template<typename T>
 void waitForData(Stream &serial, T &data, unsigned long max_wait_time_ms, const char *deviceName) {
@@ -481,7 +482,18 @@ void loop() {
 
 if (kill_switch_status == HIGH) { // Test active
     mode = 2; // "testing active"
-    system_status = 1;
+    if(show){
+      command_angle_motor(0);
+      delay(40000);
+      for(int i = 0; i < 46; i += 5){
+        command_angle_motor(i);
+        delay(1000);
+      }
+      delay(4000);
+      command_angle_motor(0);
+    }
+  else{
+
     //Serial.println("System on, running the test --->");
     if(!test_begin){
                  delay(1000);
@@ -702,15 +714,9 @@ if (kill_switch_status == HIGH) { // Test active
 
         currentAngle = start_angle; // Reset angle for the next step
     }
-
+   
     // Test is done, set all values to 0 and turn off
     test_is_done();
-    if(time_during_test == "show"){
-       //run a preprogrammed show
-    }
-    if(time_during_test == "input"){
-      // keep the angle submitted
-      // keep the speed submitted
     }
 }
 
@@ -738,9 +744,27 @@ if (kill_switch_status == LOW) { // Armed but not active
         //    Serial.println("System off");
         //}
         //count_display++;
+
+        if (Serial.available()) {
+          // Read the input as a string
+          String input = Serial.readStringUntil('\n');
+          input.trim();  // Remove extra spaces and newlines
+
+          // Handle "set" command
+           if (input.equalsIgnoreCase("show")) {
+            show = true;
+            Serial.println("The show is armed, waiting on trigger :)))");
+            delay(1000);
+          } else if (input.equalsIgnoreCase("noshow")) {
+            show = false;
+            Serial.println("The show is disarmed!");
+            delay(1000);
+          } 
+
     }
 }
 
+}
 }
 
 void test_is_done() {

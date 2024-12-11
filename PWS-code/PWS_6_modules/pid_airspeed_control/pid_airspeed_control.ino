@@ -254,7 +254,7 @@ void loop() {
           Serial.print("setpoint: ");
           Serial.println(setpoint);
           int i = 0;
-          while (i <= 500) {
+          while (i <= 400) {
             if (!system_status) {
               motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
@@ -272,7 +272,7 @@ void loop() {
           Serial.println(setpoint);
           Serial.println("continuing pid for 1 motor --->");
           int j = 0;
-          while (j < 600) {
+          while (j < 400) {
             if (!system_status) {
               motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
@@ -287,8 +287,9 @@ void loop() {
               j++;
             }
           }
+          delay(13000)
 
-          Serial.println("going faster for 30 sec");
+          //Serial.println("going faster for 30 sec");
           //than go incrementally faster for 30sec until 2000
           /*
           float k = 1300;
@@ -318,13 +319,13 @@ void loop() {
           */
           Serial.println("stopping motors!!");
           //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
-          for (int s = 1300; s > 1150; s -= 12) {
+          for (int s = 1300; s > 1100; s -= 5) {
             if (!system_status) {
               motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               return;
             }
-            command_motors(s, false);  // go faster for 30 sec
+            command_motors(s, false);  // go slower for 2 sec
             Serial.println(s);
             delay(50);
           }
@@ -409,9 +410,9 @@ void loop() {
       set = 0;
       digitalWrite(led_pin, LOW);
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
-                                                // Serial.print(airspeed_filtered);
-                                                // Serial.println(",");
-                                                //airspeed_filtered = 1.00;
+       // Serial.print(airspeed_filtered);
+       // Serial.println(",");
+       //airspeed_filtered = 1.00;
     }
 
     // Serial.println(status);
