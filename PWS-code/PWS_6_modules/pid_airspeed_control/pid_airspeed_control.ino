@@ -287,7 +287,7 @@ void loop() {
               j++;
             }
           }
-          delay(13000)
+          delay(13000);
 
           //Serial.println("going faster for 30 sec");
           //than go incrementally faster for 30sec until 2000
