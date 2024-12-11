@@ -254,7 +254,8 @@ if(!keep_speed){
         Serial.println("starting show");
          Serial.print("setpoint: ");
          Serial.println(setpoint);
-        for(int i = 0; i < 800; i++){
+         int i = 0;
+        while(i <= 800){
           if(!system_status){
             break;
           }
@@ -262,13 +263,15 @@ if(!keep_speed){
              previous_time = millis();
               airspeed_filtered = filtered_airspeed();  // kalman + moving filter
              moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
+             i++l
           }
         }
         // than cut one motor, an see the pid algorithme correcting for it
          Serial.print("setpoint: ");
          Serial.println(setpoint);
          Serial.println("continuing pid for 1 motor --->");
-        for(int j = 0; j < 1000; j++){
+         int j = 0;
+        while( j < 1000){
             if(!system_status){
             break;
           }
@@ -278,12 +281,14 @@ if(!keep_speed){
             Serial.print("airspeed: ");
             Serial.println(airspeed_filtered);
             moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one 
+             j++;
           }
         }
 
         Serial.println("going faster for 30 sec");
         //than go incrementally faster for 30sec until 2000 
-        for(float k = 1300; k <2001; k+= 1,1666666){
+        floatk = 1300;
+        while(k <2001){
             if(!system_status){
             break;
           }
@@ -293,6 +298,7 @@ if(!keep_speed){
              command_motors(k, false); // go faster for 30 sec
              Serial.print("airspeed: ");
              Serial.println(airspeed_filtered);
+             k+= 1,1666666;
           }
         }
         Serial.println("motors at full speed:");
