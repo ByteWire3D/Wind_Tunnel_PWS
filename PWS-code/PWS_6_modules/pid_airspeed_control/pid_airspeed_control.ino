@@ -250,6 +250,7 @@ if(!keep_speed){
       }
       else if(show){
          //first have it via pid an a low setpoint that works well, 4 m/s or smth
+          setpoint = 4.00;
         Serial.println("starting show");
          Serial.print("setpoint: ");
          Serial.println(setpoint);
@@ -257,8 +258,11 @@ if(!keep_speed){
           if(!system_status){
             break;
           }
-          setpoint = 4.00;
-          moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
+          if (millis() - previous_time >= interval) {
+             previous_time = millis();
+              airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+             moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
+          }
         }
         // than cut one motor, an see the pid algorithme correcting for it
          Serial.print("setpoint: ");
@@ -268,10 +272,13 @@ if(!keep_speed){
             if(!system_status){
             break;
           }
-           Serial.print("airspeed: ");
-          Serial.println(airspeed_filtered);
-          setpoint = 4.00;
-          moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one motor
+          if (millis() - previous_time >= interval) {
+            previous_time = millis();
+            airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+            Serial.print("airspeed: ");
+            Serial.println(airspeed_filtered);
+            moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one 
+          }
         }
 
         Serial.println("going faster for 30 sec");
@@ -280,12 +287,20 @@ if(!keep_speed){
             if(!system_status){
             break;
           }
-          command_motors(k, false); // go faster for 30 sec
-          Serial.print("airspeed: ");
-          Serial.println(airspeed_filtered);
+           if (millis() - previous_time >= interval) {
+             previous_time = millis();
+             airspeed_filtered = filtered_airspeed();  // kalman + moving filter
+             command_motors(k, false); // go faster for 30 sec
+             Serial.print("airspeed: ");
+             Serial.println(airspeed_filtered);
+          }
         }
-        command_motors(2000, false); // go faster for 30 sec
-        delay(5000);
+        Serial.println("motors at full speed:");
+        for(int z = 5; z>0; z--){
+          command_motors(2000, false); // go faster for 30 sec
+          delay(1000);
+          Serial.println(z);
+        }
         Serial.println("stopping motors!!");
         //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
         for(int s = 2000; s > 1150; s -= 12 ){
@@ -293,6 +308,7 @@ if(!keep_speed){
             break;
           }
           command_motors(s, false); // go faster for 30 sec
+          delay(50);
         }
         
         command_motors(minPulseWidth, false);
