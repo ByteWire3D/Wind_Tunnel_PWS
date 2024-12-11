@@ -250,6 +250,9 @@ if(!keep_speed){
       }
       else if(show){
          //first have it via pid an a low setpoint that works well, 4 m/s or smth
+        Serial.println("starting show");
+         Serial.print("setpoint: ");
+         Serial.println(setpoint);
         for(int i = 0; i < 800; i++){
           if(!system_status){
             break;
@@ -258,22 +261,32 @@ if(!keep_speed){
           moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
         }
         // than cut one motor, an see the pid algorithme correcting for it
+         Serial.print("setpoint: ");
+         Serial.println(setpoint);
+         Serial.println("continuing pid for 1 motor --->");
         for(int j = 0; j < 1000; j++){
             if(!system_status){
             break;
           }
+           Serial.print("airspeed: ");
+          Serial.println(airspeed_filtered);
           setpoint = 4.00;
           moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one motor
         }
 
+        Serial.println("going faster for 30 sec");
         //than go incrementally faster for 30sec until 2000 
         for(float k = 1300; k <2001; k+= 1,1666666){
             if(!system_status){
             break;
           }
           command_motors(k, false); // go faster for 30 sec
+          Serial.print("airspeed: ");
+          Serial.println(airspeed_filtered);
         }
-        
+        command_motors(2000, false); // go faster for 30 sec
+        delay(5000);
+        Serial.println("stopping motors!!");
         //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
         for(int s = 2000; s > 1150; s -= 12 ){
             if(!system_status){
@@ -281,10 +294,11 @@ if(!keep_speed){
           }
           command_motors(s, false); // go faster for 30 sec
         }
-         command_motors(2000, false); // go faster for 30 sec
-        delay(5000);
+        
         command_motors(minPulseWidth, false);
         show = false;
+         Serial.println("motors off! and show done! ");
+ 
 
       }
       else{
@@ -353,7 +367,7 @@ if(!keep_speed){
   if (system_status == LOW) {
     if (current_time - previous_time >= 1000) {
       previous_time = millis();
-      //Serial.println("system is off");
+      Serial.println("system is off");
     }
         if (current_time - previous_time >= interval) {
       previous_time = millis();
@@ -1124,4 +1138,3 @@ template<typename T>
 void deserializeData(const uint8_t *buffer, T &data) {
   memcpy(&data, buffer, sizeof(T));
 }
-:
