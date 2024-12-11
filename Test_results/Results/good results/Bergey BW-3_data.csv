@@ -1,7 +1,4 @@
-#!,Workbook:,Custom,Custom
-#!,Deze gegevens afspelen: open het oorspronkelijke Excel-werkmapbestand, klik op de knop *Gegevensbestand importeren* op het lint *Data Streamer* en navigeer naar dit bestand.
-#!,Ga naar http://aka.ms/hackingstem/ voor meer informatie
-killswitch pressed!!! new status: 1
+
 Waiting for PID,	93572,	2.84,	-2.33,	-0.42,	-0.33,	0.08,	12.56,	1.05,	2.34
 Waiting for PID,	93772,	2.84,	-2.33,	-0.42,	-0.33,	0.11,	12.56,	1.39,	2.36
 Waiting for PID,	93972,	2.84,	-2.34,	-0.41,	-0.33,	0.06,	12.56,	0.70,	2.37
