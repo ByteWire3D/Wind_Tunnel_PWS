@@ -1,37 +1,44 @@
-# Peregrine Falcon
-This a PWS of Faiaz Dindar and Leon Frederiks.
+# Peregrine Falcon Project
 
-The project consists of 6 modules:
+This repository documents the Peregrine Falcon project, a collaborative effort by Faiaz Dindar and Leon Frederiks.
 
-The main controller:
-- sends all the commands to the rest of the modules
+The project is divided into six main modules:
 
-The angle controller:
-- a PID controlled n20 brushed encode motor
-- cable of 1/5 deg acuraty
+# Main Controller
+The main controller is responsible for:
+- Sending all commands to the other modules.
+- Angle Controller
+- Utilizes a PID-controlled N20 brushed encoder motor.
+- Achieves an accuracy of up to 1/5 degree.
 
-The meassuring module:
-- meassures:
-  - voltage
-  - ampere
-  - wattage
-  - mah_used
-  - lift
-  - drag
+# Measuring Module
+The measuring module collects the following data:
+- Voltage
+- Current (amperes)
+- Power (wattage)
+- Energy consumption (mAh used)
+- Lift
+- Drag
 
-The pid controller:
-- meassures: airspeed (thru a kalman and moving filter) ( via a pitot tube)
-- calculates pid values given a setpoint.
-- control's 2 motors to 0.2 ms airspeed error exuracy
-- has a (software based) kill switch to disable the system in unsave situations
+# PID Controller
+The PID controller is central to the system and performs the following functions:
+- Measures airspeed using a Kalman filter and moving average filter in conjunction with a pitot tube.
+- Calculates PID values based on a given setpoint.
+- Controls two motors to maintain an airspeed error accuracy of 0.2 m/s.
+- Includes a software-based kill switch for safely disabling the system in unsafe conditions.
 
-The info display:
-- displays all the recieved data of the system.
-- and error messages (to see what state the system is currently in)
-  
-The datalogger:
-- loggs all the data to an sd card at 5 hz (8hz max)
-- and saves the test configuration, settings & cofiguration.
+# Info Display
+The info display provides:
+- Real-time system data.
+- Error messages for diagnosing system states.
+
+# Data Logger
+The data logger:
+- Logs all data to an SD card at a frequency of 5 Hz (with a maximum capability of 8 Hz).
+- Saves test configurations, system settings, and calibration values.
+- Due to noise issues, logging the date to the SD card did not work as intended. Instead, data was logged using Excel’s data streamer as an alternative solution.
+
+This modular approach ensures a robust and flexible system capable of precise measurements and control in various testing environments. The use of Excel’s data streamer as a fallback for logging highlights the adaptability of the system to handle unexpected challenges.
 
 
  
