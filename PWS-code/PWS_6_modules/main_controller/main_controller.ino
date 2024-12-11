@@ -717,51 +717,50 @@ void loop() {
       test_is_done();
     }
   }
-}
 
-if (kill_switch_status == LOW) {  // Armed but not active
-  mode = 3;                       // "armed (waiting)"
-  system_status = 0;
+  if (kill_switch_status == LOW) {  // Armed but not active
+    mode = 3;                       // "armed (waiting)"
+    system_status = 0;
 
-  if (millis() - prevMillisUpdate >= updateInterval) {
-    prevMillisUpdate = millis();
+    if (millis() - prevMillisUpdate >= updateInterval) {
+      prevMillisUpdate = millis();
 
-    // Send and receive PID data
-    // sendCommand(pid_controller, "GET", "pid_controller");
-    //waitForData(pid_controller, pid_data, 100, "pid_controller");
+      // Send and receive PID data
+      // sendCommand(pid_controller, "GET", "pid_controller");
+      //waitForData(pid_controller, pid_data, 100, "pid_controller");
 
-    // Send and receive measuring device data
-    sendCommand(meassuring_device, "GET", "meassuring_device");
-    waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
+      // Send and receive measuring device data
+      sendCommand(meassuring_device, "GET", "meassuring_device");
+      waitForData(meassuring_device, meassurment_data, 100, "meassuring_device");
 
-    command_angle_motor(0);
+      command_angle_motor(0);
 
-    // Update display data every 4 cycles
-    // if (count_display >= 4) {
-    //    count_display = 0;
-    //    send_display_data();
-    //    Serial.println("System off");
-    //}
-    //count_display++;
+      // Update display data every 4 cycles
+      // if (count_display >= 4) {
+      //    count_display = 0;
+      //    send_display_data();
+      //    Serial.println("System off");
+      //}
+      //count_display++;
 
-    if (Serial.available()) {
-      // Read the input as a string
-      String input = Serial.readStringUntil('\n');
-      input.trim();  // Remove extra spaces and newlines
+      if (Serial.available()) {
+        // Read the input as a string
+        String input = Serial.readStringUntil('\n');
+        input.trim();  // Remove extra spaces and newlines
 
-      // Handle "set" command
-      if (input.equalsIgnoreCase("show")) {
-        show = true;
-        Serial.println("The show is armed, waiting on trigger :)))");
-        delay(1000);
-      } else if (input.equalsIgnoreCase("noshow")) {
-        show = false;
-        Serial.println("The show is disarmed!");
-        delay(1000);
+        // Handle "set" command
+        if (input.equalsIgnoreCase("show")) {
+          show = true;
+          Serial.println("The show is armed, waiting on trigger :)))");
+          delay(1000);
+        } else if (input.equalsIgnoreCase("noshow")) {
+          show = false;
+          Serial.println("The show is disarmed!");
+          delay(1000);
+        }
       }
     }
   }
-}
 }
 
 void test_is_done() {
