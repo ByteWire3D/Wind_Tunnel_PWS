@@ -263,7 +263,7 @@ if(!keep_speed){
              previous_time = millis();
               airspeed_filtered = filtered_airspeed();  // kalman + moving filter
              moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
-             i++l
+             i++;
           }
         }
         // than cut one motor, an see the pid algorithme correcting for it
@@ -287,7 +287,7 @@ if(!keep_speed){
 
         Serial.println("going faster for 30 sec");
         //than go incrementally faster for 30sec until 2000 
-        floatk = 1300;
+        float k = 1300;
         while(k <2001){
             if(!system_status){
             break;
