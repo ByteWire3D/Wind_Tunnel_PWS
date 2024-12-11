@@ -241,7 +241,7 @@ if(!keep_speed){
       airspeed_filtered = filtered_airspeed();  // kalman + moving filter
       if(serial_motor != 1000){
         Serial.print("Airspeed:");
-        Serial.print(airspeed_filtered)
+        Serial.print(airspeed_filtered);
         Serial.print("\t");
         Serial.print("Motor signal:");
         Serial.print(serial_motor);
@@ -281,8 +281,9 @@ if(!keep_speed){
           }
           command_motors(s, false); // go faster for 30 sec
         }
-        delay(1000);
-        command_motors(minPulseWidth);
+         command_motors(2000, false); // go faster for 30 sec
+        delay(5000);
+        command_motors(minPulseWidth, false);
         show = false;
 
       }
@@ -1123,3 +1124,4 @@ template<typename T>
 void deserializeData(const uint8_t *buffer, T &data) {
   memcpy(&data, buffer, sizeof(T));
 }
+:
