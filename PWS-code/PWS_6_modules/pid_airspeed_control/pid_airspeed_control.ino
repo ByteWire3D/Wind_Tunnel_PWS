@@ -290,6 +290,7 @@ void loop() {
 
           Serial.println("going faster for 30 sec");
           //than go incrementally faster for 30sec until 2000
+          /*
           float k = 1300;
           while (k < 2000) {
             if (!system_status) {
@@ -314,9 +315,10 @@ void loop() {
             delay(1000);
             Serial.println(z);
           }
+          */
           Serial.println("stopping motors!!");
           //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
-          for (int s = 1800; s > 1150; s -= 12) {
+          for (int s = 1300; s > 1150; s -= 12) {
             if (!system_status) {
               motor1.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
               motor2.writeMicroseconds(minPulseWidth);  //set to 1000us puls length
