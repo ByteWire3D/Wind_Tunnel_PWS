@@ -184,7 +184,7 @@ void setup() {
 void loop() {
   unsigned long current_time = millis();
 
-  if (system_status == HIGH && main_controller_status == HIGH) {
+  if ((system_status == HIGH && main_controller_status == HIGH) or (system_status == HIGH && show == true) or (system_status == HIGH && serial_motor != 1000)) {
     digitalWrite(led_pin, HIGH);
 if(!test_begin){
                  delay(1000);
@@ -251,22 +251,34 @@ if(!keep_speed){
       else if(show){
          //first have it via pid an a low setpoint that works well, 4 m/s or smth
         for(int i = 0; i < 800; i++){
+          if(!system_status){
+            break;
+          }
           setpoint = 4.00;
           moving_baseline_pid(airspeed_filtered, setpoint, false);  //both motors
         }
         // than cut one motor, an see the pid algorithme correcting for it
         for(int j = 0; j < 1000; j++){
+            if(!system_status){
+            break;
+          }
           setpoint = 4.00;
           moving_baseline_pid(airspeed_filtered, setpoint, true); // kill one motor
         }
 
-        //than go incrementally faster 100 per 20 sec or smthing
+        //than go incrementally faster for 30sec until 2000 
         for(float k = 1300; k <2001; k+= 1,1666666){
+            if(!system_status){
+            break;
+          }
           command_motors(k, false); // go faster for 30 sec
         }
         
-        //than have a nice and gradual end, not instand, but nice and slow.
+        //than have a nice and gradual end, not instand, but nice and slow. (over 5sec)
         for(int s = 2000; s > 1150; s -= 12 ){
+            if(!system_status){
+            break;
+          }
           command_motors(s, false); // go faster for 30 sec
         }
         delay(1000);
