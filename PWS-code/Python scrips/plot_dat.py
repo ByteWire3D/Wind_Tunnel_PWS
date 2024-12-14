@@ -1,280 +1,150 @@
+import math
 import matplotlib.pyplot as plt
 
-# Constants (modify these based on your setup)
-air_density = 1.225  # kg/m^3 (at sea level)
-reference_area = 80*100 /1000000  # m^2 (example value, adjust to your model)
-
-data = """ 
-
-"""
 number_corrected = 0
+threshold = 0.2  # 20% deviation allowed
+air_density = 1.225  # kg/m^3 (default at sea level)
+reference_area = 80*100 /1000000  # m^2 (example value, adjust to your model)
+data = """ """
 
-angles = []  # Angle of attack (pitch)
 
-cl_values_284 = []  # Lift coefficient
-cd_values_284 = []  # Drag coefficient
-clcd_values_284 = [] #lift co / drag co 
-
-cl_values_483 = []  # Lift coefficient
-cd_values_483 = []  # Drag coefficient
-clcd_values_483 = [] #lift co / drag co 
-
-cl_values_682 = []  # Lift coefficient
-cd_values_682 = []  # Drag coefficient
-clcd_values_682 = [] #lift co / drag co 
-
-cl_values_880 = []  # Lift coefficient
-cd_values_880 = []  # Drag coefficient
-clcd_values_880 = [] #lift co / drag co 
-
-cl_values_1079 = []  # Lift coefficient
-cd_values_1079 = []  # Drag coefficient
-clcd_values_1079 = [] #lift co / drag co 
-
-cl_values_1278 = []  # Lift coefficient
-cd_values_1278 = []  # Drag coefficient
-clcd_values_1278 = [] #lift co / drag co 
+name = "Bergey BW-3"
+skip_speed1 = 8.80
+skip_speed2 = 0
+angles = {speed: [] for speed in [2.84, 4.83, 6.82, 8.80, 10.79, 12.78]}  # Angle of attack split by airspeed
+cl_values = {speed: [] for speed in [2.84, 4.83, 6.82, 8.80, 10.79, 12.78]}
+cd_values = {speed: [] for speed in [2.84, 4.83, 6.82, 8.80, 10.79, 12.78]}
+clcd_values = {speed: [] for speed in [2.84, 4.83, 6.82, 8.80, 10.79, 12.78]}
 
 drag_data = []
 lift_data = []
-for line in data.strip().split("\n"):
-    # Skip lines that contain specific flags
-    if "Data Flag" in line or "Waiting for PID" in line:
-        continue
-    
-    try: 
-        # Split the line by commas and extract the drag value
-        columns = line.split(",")
-        drag = float(columns[4]) * 9.81 * 0.0001  # Drag force in N (converted)
-        lift = float(columns[3]) * 9.81 * 0.0001
-        # Store the drag value in the list
-        drag_data.append(drag)
-        lift_data.append(lift)
-    
-    except ValueError:
-        # Handle any parsing errors (e.g., missing or corrupted data)
-        continue
 
-# Step 1: Find the smallest value in the drag data
-min_val = min(drag_data)
-
-# Step 2: Calculate the offset (inverse of the smallest value)
-offset = -min_val + 0.01
-
-# Step 3: Apply the offset to the entire drag data list
-#corrected_drag_data = [drag + offset for drag in drag_data]
-
-
-
-drag_dat = []
-lift_dat = []
-
-# Loop door de regels van de data
-for line in data.strip().split("\n"):
-    # Sla regels over die specifieke vlaggen bevatten
-    if "Data Flag" in line or "Waiting for PID" in line:
-        continue
-    
-    try:
-        # Splits de regel en haal de lift- en dragwaarden op
-        columns = line.split(",")
-        drag = float(columns[4]) * 9.81 * 0.0001 + offset # Drag force in N (omgezet)
-        lift = float(columns[3]) * 9.81 * 0.0001  # Lift force in N (omgezet)
-        
-        # Voeg de waarden toe aan de respectieve lijsten
-        drag_dat.append(drag)
-        lift_dat.append(lift)
-    
-    except ValueError:
-        # Verwerk eventuele parsingfouten (bijvoorbeeld ontbrekende of corrupte data)
-        continue
-
-# Stap 1: Vind de minimale en maximale waarden voor drag en lift
-min_drag = min(drag_dat)
-max_drag = max(drag_dat)
-min_lift = min(lift_dat)
-max_lift = max(lift_dat)
-
-# Stap 2: Controleer of de afwijkingen te groot zijn (bijvoorbeeld > 20% van het gemiddelde)
-threshold = 1  # 20% afwijking
-
-# Functie om te controleren of de afwijking te groot is en de waarde te corrigeren
+# Correct abnormal values
 def correct_abnormal_value(current_value, previous_value, next_value):
-    # Bereken de gemiddelde verandering tussen de vorige en volgende meting
-    if previous_value >= 0 and next_value >= 0:
-        avg_growth = (next_value - previous_value) / 2
-        corrected_value =  avg_growth
-        return corrected_value
+    if previous_value > 0 and next_value > 0:
+         if current_value == 0 or (abs(current_value - previous_value) / previous_value > threshold and abs(current_value - next_value) / next_value > threshold):
+            return (previous_value + next_value) / 2
     return current_value
 
-# Stap 3: Corrigeer de waarden als de afwijking te groot is
-corrected_drag_data = []
-corrected_lift_data = []
-
-for i in range(1, len(drag_dat) - 1):
-    drag_value = drag_dat[i]
-    lift_value = lift_dat[i] 
-    
-    # Vergelijk met vorige en volgende waarden
-    if abs(drag_value - drag_dat[i-1]) > threshold * abs(drag_dat[i-1]) and abs(drag_value - drag_dat[i+1]) > threshold * abs(drag_dat[i+1]):
-        drag_value = correct_abnormal_value(drag_value, drag_dat[i-1], drag_dat[i+1])
-        number_corrected += 1
-    
-    if abs(lift_value - lift_dat[i-1]) > threshold * abs(lift_dat[i-1]) and abs(lift_value - lift_dat[i+1]) > threshold * abs(lift_dat[i+1]):
-        lift_value = correct_abnormal_value(lift_value, lift_dat[i-1], lift_dat[i+1])
-        number_corrected += 1
-    
-    corrected_drag_data.append(drag_value)
-    corrected_lift_data.append(lift_value)
-
-# Voeg de eerste en laatste waarden zonder wijziging toe (omdat ze geen beide buren hebben)
-corrected_drag_data = [drag_dat[0]] + corrected_drag_data + [drag_dat[-1]]
-corrected_lift_data = [lift_dat[0]] + corrected_lift_data + [lift_dat[-1]]
-
-# Initialize a counter to iterate through corrected data
-corrected_index = 0
-
-for line in data.strip().split("\n"):
+# Process raw data
+for i, line in enumerate(data.strip().split("\n")):
     if "Data Flag" in line or "Waiting for PID" in line:
         continue
-
     try:
-
         columns = line.split(",")
-        airspeed = float(columns[2])
-        pitch = float(columns[5])  # Angle of attack in degrees
-        
-        # Use corrected lift and drag values
-        lift = corrected_lift_data[corrected_index] 
-        drag = corrected_drag_data[corrected_index] 
-
-        corrected_index += 1  # Increment the index to match corrected data
-
-        # Compute coefficients
-        cl = 2 * lift / (air_density * airspeed**2 * reference_area)
-        cd = 2 * drag / (air_density * airspeed**2 * reference_area)
-
-        # Handle fallback for `cl` and `cd` values
-        target_list = cl_values_284 if airspeed == 2.84 else \
-                      cl_values_483 if airspeed == 4.83 else \
-                      cl_values_682 if airspeed == 6.82 else \
-                      cl_values_880 if airspeed == 8.80 else \
-                      cl_values_1079 if airspeed == 10.79 else \
-                      cl_values_1278 if airspeed == 12.78 else []
-        if cl == 0 or cl <= 0.1:
-       # if abs(cl - target_list[corrected_index - 1]) > threshold * abs(target_list[corrected_index - 1]) and abs(cl - target_list[corrected_index -2]) > threshold * abs(target_list[corrected_index -2]) or cl == 0:
-            if len(target_list) >= 2:
-                cl = target_list[-1] + (target_list[-2] - target_list[-1])
-        
-        target_list = cd_values_284 if airspeed == 2.84 else \
-                      cd_values_483 if airspeed == 4.83 else \
-                      cd_values_682 if airspeed == 6.82 else \
-                      cd_values_880 if airspeed == 8.80 else \
-                      cd_values_1079 if airspeed == 10.79 else \
-                      cd_values_1278 if airspeed == 12.78 else []
-        if cd == 0 or cd <= 0.1:
-        #if abs(cd - target_list[corrected_index - 1]) > threshold * abs(target_list[corrected_index - 1]) and abs(cd - target_list[corrected_index - 2]) > threshold * abs(target_list[corrected_index -2]) or cd == 0:
-            if len(target_list) >= 2:
-                cd = target_list[-1] + (target_list[-2] - target_list[-1])
-
-        if cl != 0 and cd != 0:
-            cl_cd = cl / cd
-
-        # Append data
-        if airspeed == 2.84:
-            angles.append(pitch)
-            cl_values_284.append(cl)
-            cd_values_284.append(cd)
-            clcd_values_284.append(cl_cd)
-        elif airspeed == 4.83:
-            angles.append(pitch)
-            cl_values_483.append(cl)
-            cd_values_483.append(cd)
-            clcd_values_483.append(cl_cd)
-        elif airspeed == 6.82:
-            angles.append(pitch)
-            cl_values_682.append(cl)
-            cd_values_682.append(cd)
-            clcd_values_682.append(cl_cd)
-        elif airspeed == 8.80:
-            angles.append(pitch)
-            cl_values_880.append(cl)
-            cd_values_880.append(cd)
-            clcd_values_880.append(cl_cd)
-        elif airspeed == 10.79:
-            angles.append(pitch)
-            cl_values_1079.append(cl)
-            cd_values_1079.append(cd)
-            clcd_values_1079.append(cl_cd)
-        elif airspeed == 12.78:
-            angles.append(pitch)
-            cl_values_1278.append(cl)
-            cd_values_1278.append(cd)
-            clcd_values_1278.append(cl_cd)
-    except (ValueError, IndexError):
+        if len(columns) < 5:
+            print(f"continued for Index: {i}.")
+            continue
+        drag = float(columns[4]) * 9.81 / 1000
+        lift = float(columns[3]) * 9.81 / 1000
+        #print(i, end=",\t")
+        #print(columns[2])
+        drag_data.append(drag)
+        lift_data.append(lift)
+    except ValueError:
+        print(f"got a value error for Index: {i}.")
         continue
 
+# Apply offsets
+offset_lift = -min(lift_data) if min(lift_data) < 0 else 0
+offset_drag = -min(drag_data) if min(drag_data) < 0 else 0
 
+# Correct and smooth data
+corrected_drag_data = [drag_data[0]]
+corrected_lift_data = [lift_data[0]]
+print("drag data len: ", end="\t")
+print(len(drag_data))
+for i in range(1, len(drag_data) - 1):
+    corrected_drag_data.append(correct_abnormal_value(drag_data[i], drag_data[i - 1], drag_data[i + 1]))
+    corrected_lift_data.append(correct_abnormal_value(lift_data[i], lift_data[i - 1], lift_data[i + 1]))
+corrected_drag_data.append(drag_data[-1])
+corrected_lift_data.append(lift_data[-1])
 
+print("corrected data len: ", end="\t")
+print(len(corrected_drag_data))
+# Calculate coefficients
+for i, line in enumerate(data.strip().split("\n")):
+    if "Data Flag" in line or "Waiting for PID" in line:
+        continue
+    try:
+        columns = line.split(",")
+        pitch = float(columns[5]) * math.pi / 180
+        airspeed = float(columns[2])
+        lift = corrected_lift_data[i] + offset_lift
+        drag = corrected_drag_data[i] + offset_drag +0.01
 
-# Plotting
-# Plot Cl vs Angle of Attack (alpha) for different airspeeds
+        cl = 2 * lift / (air_density * airspeed**2 * reference_area * math.cos(pitch))
+        cd = 2 * drag / (air_density * airspeed**2 * reference_area * math.cos(pitch))
+        if cl > 0 and cd > 0:
+            clcd = cl / cd
+            cl_values[airspeed].append(cl)
+            cd_values[airspeed].append(cd)
+            clcd_values[airspeed].append(clcd)
+            angles[airspeed].append(pitch * 180 / math.pi)
+    except (ValueError, IndexError):
+        #print(f"Index {i} is out of range for corrected_lift_data.")
+        continue
+
+def moving_average(data, window_size):
+    return [sum(data[i:i+window_size]) / window_size for i in range(len(data) - window_size + 1)]
+
+def truncate_list(data, size):
+    return data[:size]
+
+size =10
+for speed in cl_values:
+    cl_values[speed] = moving_average(cl_values[speed], size)
+
+for speed in cd_values:
+    cd_values[speed] = moving_average(cd_values[speed], size)
+
+for speed in clcd_values:
+    clcd_values[speed] = moving_average(clcd_values[speed], size)
+
+for speed in angles:
+    angles[speed] = truncate_list(angles[speed], len(cl_values[speed]))
+# Lift Coefficient (Cl) vs Angle of Attack
 plt.figure()
-plt.plot(angles[:len(cl_values_284)], cl_values_284, label='Cl (2.84 m/s)', marker=',')
-plt.plot(angles[:len(cl_values_483)], cl_values_483, label='Cl (4.83 m/s)', marker=',')
-plt.plot(angles[:len(cl_values_682)], cl_values_682, label='Cl (6.82 m/s)', marker=',')
-plt.plot(angles[:len(cl_values_880)], cl_values_880, label='Cl (8.80 m/s)', marker=',')
-plt.plot(angles[:len(cl_values_1079)], cl_values_1079, label='Cl (10.79 m/s)', marker=',')
-plt.plot(angles[:len(cl_values_1278)], cl_values_1278, label='Cl (12.78 m/s)', marker=',')
+for speed, cl in cl_values.items():
+    if cl:
+        plt.plot(angles[speed], cl, label=f"Cl ({speed} m/s)", marker=",")
 plt.xlabel('Angle of Attack (degrees)')
 plt.ylabel('Lift Coefficient (Cl)')
-plt.title('Lift Coefficient vs Angle of Attack for Different Airspeeds')
-plt.grid(True)
+plt.title(f'Lift Coefficient vs Angle of Attack for {name}')
 plt.legend()
+plt.grid(True)
 
-# Plot C_D vs Angle of Attack (alpha) for different airspeeds
+# Drag Coefficient (Cd) vs Angle of Attack
 plt.figure()
-plt.plot(angles[:len(cd_values_284)], cd_values_284, label='Cd (2.84 m/s)', marker=',')
-plt.plot(angles[:len(cd_values_483)], cd_values_483, label='Cd (4.83 m/s)', marker=',')
-plt.plot(angles[:len(cd_values_682)], cd_values_682, label='Cd (6.82 m/s)', marker=',')
-plt.plot(angles[:len(cd_values_880)], cd_values_880, label='Cd (8.80 m/s)', marker=',')
-plt.plot(angles[:len(cd_values_1079)], cd_values_1079, label='Cd (10.79 m/s)', marker=',')
-plt.plot(angles[:len(cd_values_1278)], cd_values_1278, label='Cd (12.78 m/s)', marker=',')
+for speed, cd in cd_values.items():
+    if cd:
+     plt.plot(angles[speed], cd, label=f"Cd ({speed} m/s)", marker=",")
 plt.xlabel('Angle of Attack (degrees)')
 plt.ylabel('Drag Coefficient (Cd)')
-plt.title('Drag Coefficient vs Angle of Attack for Different Airspeeds')
-plt.grid(True)
+plt.title(f'Drag Coefficient vs Angle of Attack for {name}')
 plt.legend()
+plt.grid(True)
 
-
-# Plot Cl/Cd vs Angle of Attack (alpha) for different airspeeds
+# Lift-to-Drag Ratio (Cl/Cd) vs Angle of Attack
 plt.figure()
-plt.plot(angles[:len(clcd_values_284)], clcd_values_284, label='Cl/Cd (2.84 m/s)', marker=',')
-plt.plot(angles[:len(clcd_values_483)], clcd_values_483, label='Cl/Cd (4.83 m/s)', marker=',')
-plt.plot(angles[:len(clcd_values_682)], clcd_values_682, label='Cl/Cd (6.82 m/s)', marker=',')
-plt.plot(angles[:len(clcd_values_880)], clcd_values_880, label='Cl/Cd (8.80 m/s)', marker=',')
-plt.plot(angles[:len(clcd_values_1079)], clcd_values_1079, label='Cl/Cd (10.79 m/s)', marker=',')
-plt.plot(angles[:len(clcd_values_1278)], clcd_values_1278, label='Cl/Cd (12.78 m/s)', marker=',')
+for speed, clcd in clcd_values.items():
+    if clcd:
+     plt.plot(angles[speed], clcd, label=f"Cl/Cd ({speed} m/s)", marker=",")
 plt.xlabel('Angle of Attack (degrees)')
 plt.ylabel('Lift-to-Drag Ratio (Cl/Cd)')
-plt.title('Cl/Cd vs Angle of Attack for Different Airspeeds')
-plt.grid(True)
+plt.title(f'Lift-to-Drag Ratio vs Angle of Attack for {name}')
 plt.legend()
+plt.grid(True)
 
-
-# Plot Cl vs Cd for different airspeeds
+# Lift Coefficient (Cl) vs Drag Coefficient (Cd)
 plt.figure()
-plt.plot(cd_values_284, cl_values_284, label='Cl vs Cd (2.84 m/s)', marker='.')
-plt.plot(cd_values_483, cl_values_483, label='Cl vs Cd (4.83 m/s)', marker='.')
-plt.plot(cd_values_682, cl_values_682, label='Cl vs Cd (6.82 m/s)', marker='.')
-plt.plot(cd_values_880, cl_values_880, label='Cl vs Cd (8.80 m/s)', marker='.')
-plt.plot(cd_values_1079, cl_values_1079, label='Cl vs Cd (10.79 m/s)', marker='.')
-plt.plot(cd_values_1278, cl_values_1278, label='Cl vs Cd (12.78 m/s)', marker='.')
+for speed in cl_values.keys():
+    if speed != skip_speed1 and speed != skip_speed2:
+        plt.plot(cd_values[speed], cl_values[speed], label=f"{speed} m/s", marker=",")
 plt.xlabel('Drag Coefficient (Cd)')
 plt.ylabel('Lift Coefficient (Cl)')
-plt.title('Cl vs Cd for Different Airspeeds')
-plt.grid(True)
+plt.title(f'Lift Coefficient vs Drag Coefficient for {name}')
 plt.legend()
+plt.grid(True)
 
-print(number_corrected)
 plt.show()
